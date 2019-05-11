@@ -1,11 +1,11 @@
 package main
 
 import (
-	// Import the gorilla/mux library we just installed
 	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/indam-m/ss-assessment-toko_ijah/db"
 )
 
 func newRouter() *mux.Router {
@@ -21,12 +21,20 @@ func newRouter() *mux.Router {
 }
 
 func main() {
+	db.Open()
 	// Declare a new router
 	r := newRouter()
 
 	// This is where the router is useful, it allows us to declare methods that
 	// this path will be valid for
-	r.HandleFunc("/hello", handler).Methods("GET")
+	r.HandleFunc("/item", handler).Methods("GET")
+	r.HandleFunc("/item/create", handler).Methods("POST")
+	r.HandleFunc("/item-in", handler).Methods("GET")
+	r.HandleFunc("/item-in/create", handler).Methods("POST")
+	r.HandleFunc("/item-out", handler).Methods("GET")
+	r.HandleFunc("/item-out/create", handler).Methods("POST")
+	r.HandleFunc("/item-value-report", handler).Methods("GET")
+	r.HandleFunc("/sales-report", handler).Methods("GET")
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
