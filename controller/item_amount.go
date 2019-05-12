@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/indam-m/ss-assessment-toko_ijah/model"
@@ -12,7 +14,7 @@ import (
 // ItemAmount is used as the controller struct
 type ItemAmount struct{}
 
-func getItemAmount(r *http.Request) model.ItemAmount {
+func getInitItemAmount(r *http.Request) model.ItemAmount {
 	var itemAmount model.ItemAmount
 	itemAmount.SKU = r.FormValue("SKU")
 	itemAmount.Name = r.FormValue("Name")
@@ -20,11 +22,7 @@ func getItemAmount(r *http.Request) model.ItemAmount {
 	return itemAmount
 }
 
-// GetItemAmounts returns list of item_amounts
-func (ctrl ItemAmount) GetItemAmounts(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusBadRequest)
-	}
+func getItemAmountList(w http.ResponseWriter, r *http.Request) []model.ItemAmount {
 	rows, err := database.Query("SELECT * FROM item_amount")
 	checkInternalServerError(err, w)
 
@@ -35,6 +33,46 @@ func (ctrl ItemAmount) GetItemAmounts(w http.ResponseWriter, r *http.Request) {
 		checkInternalServerError(err, w)
 		itemAmounts = append(itemAmounts, itemAmount)
 	}
+	return itemAmounts
+}
+
+// GetItemAmounts returns list of item_amounts
+func (ctrl ItemAmount) GetItemAmounts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusBadRequest)
+	}
+	itemAmounts := getItemAmountList(w, r)
+
+	t, err := json.Marshal(itemAmounts)
+	checkInternalServerError(err, w)
+	fmt.Fprintf(w, string(t))
+}
+
+// ExportItemAmounts exports list of item_amounts
+func (ctrl ItemAmount) ExportItemAmounts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/item-amount", 301)
+	}
+	itemAmounts := getItemAmountList(w, r)
+
+	// creating csv file
+	f, err := os.Create("catatan_jumlah_barang.csv")
+	checkInternalServerError(err, w)
+	defer f.Close()
+	csvw := csv.NewWriter(f)
+	defer csvw.Flush()
+
+	csvw.Write([]string{"SKU", "Nama Item", "Jumlah Sekarang"})
+	for _, v := range itemAmounts {
+		err := csvw.Write([]string{
+			v.SKU,
+			v.Name,
+			convertToStr(v.Quantity),
+		})
+		checkInternalServerError(err, w)
+	}
+	// done creating csv file
+
 	t, err := json.Marshal(itemAmounts)
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, string(t))
@@ -61,9 +99,9 @@ func (ctrl ItemAmount) GetItemAmount(w http.ResponseWriter, r *http.Request, ite
 // CreateItemAmount creates an item_amount from request
 func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-amount", 301)
 	}
-	itemAmount := getItemAmount(r)
+	itemAmount := getInitItemAmount(r)
 
 	// Save to database
 	stmt, err := database.Prepare(`
@@ -87,9 +125,9 @@ func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) 
 // UpdateItemAmount updates an item_amount from request
 func (ctrl ItemAmount) UpdateItemAmount(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-amount", 301)
 	}
-	itemAmount := getItemAmount(r)
+	itemAmount := getInitItemAmount(r)
 
 	stmt, err := database.Prepare(`
 		UPDATE item_amount SET name=?, quantity=?
@@ -108,7 +146,7 @@ func (ctrl ItemAmount) UpdateItemAmount(w http.ResponseWriter, r *http.Request) 
 // DeleteItemAmount deletes an item_amount using requested SKU
 func (ctrl ItemAmount) DeleteItemAmount(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-amount", 301)
 	}
 	var itemSKU = r.FormValue("SKU")
 	stmt, err := database.Prepare("DELETE FROM item_amount WHERE sku=?")

@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/indam-m/ss-assessment-toko_ijah/model"
@@ -12,7 +14,7 @@ import (
 // ItemOut is used as the controller struct
 type ItemOut struct{}
 
-func getItemOut(r *http.Request) model.ItemOut {
+func getInitItemOut(r *http.Request) model.ItemOut {
 	var itemOut model.ItemOut
 	itemOut.ID, _ = strconv.ParseInt(r.FormValue("ID"), 10, 64)
 	itemOut.SKU = r.FormValue("SKU")
@@ -24,11 +26,7 @@ func getItemOut(r *http.Request) model.ItemOut {
 	return itemOut
 }
 
-// GetItemOuts returns list of item_outs
-func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusBadRequest)
-	}
+func getItemOutList(w http.ResponseWriter, r *http.Request) []model.ItemOut {
 	rows, err := database.Query(`
 		SELECT item_out.id, item_out.time, item_out.sku,
 		item_amount.name, item_out.amount_out, item_out.selling_price,
@@ -52,6 +50,50 @@ func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
 		itemOut.Total = itemOut.AmountOut * itemOut.SellingPrice
 		itemOuts = append(itemOuts, itemOut)
 	}
+	return itemOuts
+}
+
+// GetItemOuts returns list of item_outs
+func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusBadRequest)
+	}
+	itemOuts := getItemOutList(w, r)
+
+	t, err := json.Marshal(itemOuts)
+	checkInternalServerError(err, w)
+	fmt.Fprintf(w, string(t))
+}
+
+// ExportItemOuts exports list of item_outs
+func (ctrl ItemOut) ExportItemOuts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/item-out", 301)
+	}
+	itemOuts := getItemOutList(w, r)
+
+	// creating csv file
+	f, err := os.Create("catatan_barang_keluar.csv")
+	checkInternalServerError(err, w)
+	defer f.Close()
+	csvw := csv.NewWriter(f)
+	defer csvw.Flush()
+
+	csvw.Write([]string{"Waktu", "SKU", "Nama Barang", "Jumlah Keluar", "Harga Jual", "Total", "Catatan"})
+	for _, v := range itemOuts {
+		err := csvw.Write([]string{
+			getDateTimeStr(v.Time),
+			v.SKU,
+			v.Name,
+			convertToStr(v.AmountOut),
+			convertToStr(v.SellingPrice),
+			convertToStr(v.Total),
+			v.Notes,
+		})
+		checkInternalServerError(err, w)
+	}
+	// done creating csv file
+
 	t, err := json.Marshal(itemOuts)
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, string(t))
@@ -60,9 +102,9 @@ func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
 // CreateItemOut creates an item_out from request
 func (ctrl ItemOut) CreateItemOut(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-out", 301)
 	}
-	itemOut := getItemOut(r)
+	itemOut := getInitItemOut(r)
 
 	// Save to database
 	stmt, err := database.Prepare(`
@@ -91,9 +133,9 @@ func (ctrl ItemOut) CreateItemOut(w http.ResponseWriter, r *http.Request) {
 // UpdateItemOut updates an item_out from request using item_out ID
 func (ctrl ItemOut) UpdateItemOut(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-out", 301)
 	}
-	itemOut := getItemOut(r)
+	itemOut := getInitItemOut(r)
 
 	stmt, err := database.Prepare(`
 		UPDATE item_out SET time=?, sku=?,
@@ -119,7 +161,7 @@ func (ctrl ItemOut) UpdateItemOut(w http.ResponseWriter, r *http.Request) {
 // DeleteItemOut deletes an item_out using requested ID
 func (ctrl ItemOut) DeleteItemOut(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-out", 301)
 	}
 	var itemID = r.FormValue("ID")
 	stmt, err := database.Prepare("DELETE FROM item_out WHERE id=?")

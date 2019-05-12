@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/indam-m/ss-assessment-toko_ijah/model"
@@ -12,7 +14,7 @@ import (
 // ItemIn is used as the controller struct
 type ItemIn struct{}
 
-func getItemIn(r *http.Request) model.ItemIn {
+func getInitItemIn(r *http.Request) model.ItemIn {
 	var itemIn model.ItemIn
 	itemIn.ID, _ = strconv.ParseInt(r.FormValue("ID"), 10, 64)
 	itemIn.SKU = r.FormValue("SKU")
@@ -25,15 +27,12 @@ func getItemIn(r *http.Request) model.ItemIn {
 	return itemIn
 }
 
-// GetItemIns returns list of item_ins
-func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusBadRequest)
-	}
+func getItemInList(w http.ResponseWriter, r *http.Request) []model.ItemIn {
 	rows, err := database.Query(`
 		SELECT item_in.id, item_in.time, item_in.sku,
 		item_amount.name, item_in.amount_orders, item_in.amount_received,
-		item_in.purchase_price, item_in.receipt_number, item_in.notes
+		item_in.purchase_price, item_in.receipt_number, item_in.notes,
+		(item_in.purchase_price * item_in.amount_orders) AS total
 		FROM item_in
 		INNER JOIN item_amount ON item_in.sku=item_amount.sku
 	`)
@@ -48,11 +47,57 @@ func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
 			&itemIn.SKU, &itemIn.Name,
 			&itemIn.AmountOrders, &itemIn.AmountReceived,
 			&itemIn.PurchasePrice, &itemIn.ReceiptNumber,
-			&itemIn.Notes,
+			&itemIn.Notes, &itemIn.Total,
 		)
 		checkInternalServerError(err, w)
 		itemIns = append(itemIns, itemIn)
 	}
+	return itemIns
+}
+
+// GetItemIns returns list of item_ins
+func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusBadRequest)
+	}
+	itemIns := getItemInList(w, r)
+
+	t, err := json.Marshal(itemIns)
+	checkInternalServerError(err, w)
+	fmt.Fprintf(w, string(t))
+}
+
+// ExportItemIns exports list of item_ins
+func (ctrl ItemIn) ExportItemIns(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/item-in", 301)
+	}
+	itemIns := getItemInList(w, r)
+
+	// creating csv file
+	f, err := os.Create("catatan_barang_masuk.csv")
+	checkInternalServerError(err, w)
+	defer f.Close()
+	csvw := csv.NewWriter(f)
+	defer csvw.Flush()
+
+	csvw.Write([]string{"Waktu", "SKU", "Nama Barang", "Jumlah Pemesanan", "Jumlah Diterima", "Harga Beli", "Total", "Nomer Kwitansi", "Catatan"})
+	for _, v := range itemIns {
+		err := csvw.Write([]string{
+			getDateTimeStr(v.Time),
+			v.SKU,
+			v.Name,
+			convertToStr(v.AmountOrders),
+			convertToStr(v.AmountReceived),
+			convertToStr(v.PurchasePrice),
+			convertToStr(v.Total),
+			v.ReceiptNumber,
+			v.Notes,
+		})
+		checkInternalServerError(err, w)
+	}
+	// done creating csv file
+
 	t, err := json.Marshal(itemIns)
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, string(t))
@@ -61,9 +106,9 @@ func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
 // CreateItemIn creates an item_in from request
 func (ctrl ItemIn) CreateItemIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-in", 301)
 	}
-	itemIn := getItemIn(r)
+	itemIn := getInitItemIn(r)
 
 	// Save to database
 	stmt, err := database.Prepare(`
@@ -92,9 +137,9 @@ func (ctrl ItemIn) CreateItemIn(w http.ResponseWriter, r *http.Request) {
 // UpdateItemIn updates an item_in from request using item_in ID
 func (ctrl ItemIn) UpdateItemIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-in", 301)
 	}
-	itemIn := getItemIn(r)
+	itemIn := getInitItemIn(r)
 
 	stmt, err := database.Prepare(`
 		UPDATE item_in SET time=?, sku=?,
@@ -121,7 +166,7 @@ func (ctrl ItemIn) UpdateItemIn(w http.ResponseWriter, r *http.Request) {
 // DeleteItemIn deletes an item_in using requested ID
 func (ctrl ItemIn) DeleteItemIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/item-in", 301)
 	}
 	var itemID = r.FormValue("ID")
 	stmt, err := database.Prepare("DELETE FROM item_in WHERE id=?")

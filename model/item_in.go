@@ -9,6 +9,7 @@ type ItemIn struct {
 	AmountOrders   int64  `json:"amount_orders"`
 	AmountReceived int64  `json:"amount_received"`
 	PurchasePrice  int64  `json:"purchase_price"`
+	Total          int64  `json:"total"`
 	ReceiptNumber  string `json:"receipt_number"`
 	Notes          string `json:"notes"`
 }
