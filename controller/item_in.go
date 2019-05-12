@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -23,7 +24,7 @@ func getInitItemIn(r *http.Request) model.ItemIn {
 	itemIn.PurchasePrice, _ = strconv.ParseInt(r.FormValue("PurchasePrice"), 10, 64)
 	itemIn.ReceiptNumber = r.FormValue("ReceiptNumber")
 	itemIn.Notes = r.FormValue("Notes")
-	itemIn.Time = getStringDate(r.FormValue("Time"))
+	itemIn.Time = convertDateForSQL(r.FormValue("Time"))
 	return itemIn
 }
 
@@ -85,7 +86,7 @@ func (ctrl ItemIn) ExportItemIns(w http.ResponseWriter, r *http.Request) {
 	for _, v := range itemIns {
 		err := csvw.Write([]string{
 			convertToStr(v.ID),
-			getDateTimeStr(v.Time),
+			convertToUITime(v.Time),
 			v.SKU,
 			v.Name,
 			convertToStr(v.AmountOrders),
@@ -177,4 +178,46 @@ func (ctrl ItemIn) DeleteItemIn(w http.ResponseWriter, r *http.Request) {
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, "Deleting succeeded!")
+}
+
+// ImportItemIns imports item_in list from csv file
+func (ctrl ItemIn) ImportItemIns(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/item-in", 301)
+	}
+	f, err := os.Open(r.FormValue("FileName"))
+	if err != nil {
+		checkInternalServerError(err, w)
+	}
+	defer f.Close()
+
+	csvr := csv.NewReader(f)
+
+	skipHeader := false
+	sqlStr := `INSERT INTO item_in(time, sku, amount_orders,
+		amount_received, purchase_price, receipt_number, notes)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`
+	for {
+		row, err := csvr.Read()
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+				break
+			}
+			checkInternalServerError(err, w)
+
+		} else if skipHeader {
+			vals := []interface{}{
+				convertDateForSQL(row[0]), row[1],
+				convertToInt(row[3]), convertToInt(row[4]),
+				convertToInt(row[5]), row[7], row[8],
+			}
+			execImport(sqlStr, vals, w)
+		} else {
+			skipHeader = true
+		}
+	}
+	if err == nil {
+		fmt.Fprintln(w, "Importing succeeded!")
+	}
 }

@@ -164,7 +164,7 @@ func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
 	for _, v := range report.Rows {
 		err := csvw.Write([]string{
 			v.OrderID,
-			getDateTimeStr(v.Time),
+			convertToUITime(v.Time),
 			v.SKU,
 			v.Name,
 			convertToStr(v.Amount),

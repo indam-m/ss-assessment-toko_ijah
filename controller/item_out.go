@@ -4,8 +4,10 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 
 	"github.com/indam-m/ss-assessment-toko_ijah/model"
@@ -22,7 +24,7 @@ func getInitItemOut(r *http.Request) model.ItemOut {
 	itemOut.SellingPrice, _ = strconv.ParseInt(r.FormValue("SellingPrice"), 10, 64)
 	itemOut.OrderID = r.FormValue("OrderID")
 	itemOut.Notes = r.FormValue("Notes")
-	itemOut.Time = getStringDate(r.FormValue("Time"))
+	itemOut.Time = convertDateForSQL(r.FormValue("Time"))
 	return itemOut
 }
 
@@ -83,7 +85,7 @@ func (ctrl ItemOut) ExportItemOuts(w http.ResponseWriter, r *http.Request) {
 	for _, v := range itemOuts {
 		err := csvw.Write([]string{
 			convertToStr(v.ID),
-			getDateTimeStr(v.Time),
+			convertToUITime(v.Time),
 			v.SKU,
 			v.Name,
 			convertToStr(v.AmountOut),
@@ -172,4 +174,54 @@ func (ctrl ItemOut) DeleteItemOut(w http.ResponseWriter, r *http.Request) {
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, "Deleting succeeded!")
+}
+
+// ImportItemOuts imports item_out list from csv file
+func (ctrl ItemOut) ImportItemOuts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/item-out", 301)
+	}
+	f, err := os.Open(r.FormValue("FileName"))
+	if err != nil {
+		checkInternalServerError(err, w)
+	}
+	defer f.Close()
+
+	csvr := csv.NewReader(f)
+
+	skipHeader := false
+	sqlStr := `
+		INSERT INTO item_out(time, sku, amount_out,
+		selling_price, order_id, notes)
+		VALUES (?, ?, ?, ?, ?, ?)
+	`
+	for {
+		row, err := csvr.Read()
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+				break
+			}
+			checkInternalServerError(err, w)
+
+		} else if skipHeader {
+			re := regexp.MustCompile("ID(-\\d+)+")
+			match := re.FindStringSubmatch(row[6])
+			var orderID string
+			if len(match) > 0 {
+				orderID = match[0]
+			}
+			vals := []interface{}{
+				convertDateForSQL(row[0]), row[1],
+				convertToInt(row[3]), convertToInt(row[4]),
+				orderID, row[6],
+			}
+			execImport(sqlStr, vals, w)
+		} else {
+			skipHeader = true
+		}
+	}
+	if err == nil {
+		fmt.Fprintln(w, "Importing succeeded!")
+	}
 }

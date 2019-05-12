@@ -2,7 +2,9 @@ package controller
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -35,10 +37,13 @@ func checkInternalServerError(err error, w http.ResponseWriter) {
 	}
 }
 
-func getStringDate(str string) string {
+func convertDateForSQL(str string) string {
 	t, err := time.Parse("2006/01/02 15:04:05", str)
 	if err != nil {
-		return time.Now().Format(time.RFC3339)
+		t, err = time.Parse("2006/01/02 15:04", str)
+		if err != nil {
+			return time.Now().Format(time.RFC3339)
+		}
 	}
 	return t.Format(time.RFC3339)
 }
@@ -48,10 +53,38 @@ func convertToStr(val int64) string {
 	return str
 }
 
-func getDateTimeStr(str string) string {
+func convertToInt(str string) int64 {
+	re := regexp.MustCompile(",")
+	str = re.ReplaceAllString(str, "")
+	if len(str) > 2 && str[0:2] == "Rp" {
+		str = str[2:]
+	}
+	res, _ := strconv.ParseInt(str, 10, 64)
+	return res
+}
+
+func convertToUITime(str string) string {
 	t, err := time.Parse(time.RFC3339, str)
 	if err != nil {
 		return str
 	}
 	return t.Format("2006/01/02 15:04:05")
+}
+
+func execImport(sqlStr string, vals []interface{}, w http.ResponseWriter) error {
+	// prepare the statement
+	stmt, err := database.Prepare(sqlStr)
+	if err != nil {
+		fmt.Fprintln(w, "Prepare query error")
+		fmt.Fprintf(w, err.Error())
+		return err
+	}
+	// execute the statement
+	_, err = stmt.Exec(vals...)
+	if err != nil {
+		fmt.Fprintln(w, "Execute query error")
+		fmt.Fprintf(w, err.Error())
+		return err
+	}
+	return err
 }

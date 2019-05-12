@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -111,11 +112,13 @@ func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		fmt.Fprintln(w, "Prepare query error")
 		fmt.Fprintf(w, err.Error())
+		return
 	}
 	_, err = stmt.Exec(itemAmount.SKU, itemAmount.Name, itemAmount.Quantity)
 	if err != nil {
 		fmt.Fprintln(w, "Execute query error")
 		fmt.Fprintf(w, err.Error())
+		return
 	}
 	txt, _ := json.Marshal(itemAmount)
 	fmt.Fprintln(w, "Creating succeeded!")
@@ -156,4 +159,42 @@ func (ctrl ItemAmount) DeleteItemAmount(w http.ResponseWriter, r *http.Request) 
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, "Deleting succeeded!")
+}
+
+// ImportItemAmounts imports item_amount list from csv file
+func (ctrl ItemAmount) ImportItemAmounts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/item-amount", 301)
+	}
+	f, err := os.Open(r.FormValue("FileName"))
+	if err != nil {
+		checkInternalServerError(err, w)
+	}
+	defer f.Close()
+
+	csvr := csv.NewReader(f)
+
+	skipHeader := false
+	sqlStr := "INSERT OR REPLACE INTO item_amount(sku, name, quantity) VALUES(?, ?, ?)"
+	for {
+		row, err := csvr.Read()
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+				break
+			}
+			checkInternalServerError(err, w)
+
+		} else if skipHeader {
+			vals := []interface{}{
+				row[0], row[1], convertToInt(row[2]),
+			}
+			err = execImport(sqlStr, vals, w)
+		} else {
+			skipHeader = true
+		}
+	}
+	if err == nil {
+		fmt.Fprintln(w, "Importing succeeded!")
+	}
 }
