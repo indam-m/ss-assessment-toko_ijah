@@ -14,6 +14,7 @@ type ItemIn struct{}
 
 func getItemIn(r *http.Request) model.ItemIn {
 	var itemIn model.ItemIn
+	itemIn.ID, _ = strconv.ParseInt(r.FormValue("ID"), 10, 64)
 	itemIn.SKU = r.FormValue("SKU")
 	itemIn.AmountOrders, _ = strconv.ParseInt(r.FormValue("AmountOrders"), 10, 64)
 	itemIn.AmountReceived, _ = strconv.ParseInt(r.FormValue("AmountReceived"), 10, 64)
@@ -40,10 +41,10 @@ func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
 
 	var itemIns []model.ItemIn
 	var itemIn model.ItemIn
-	ds, _ := rows.Columns()
-	fmt.Println(ds)
+
 	for rows.Next() {
-		err = rows.Scan(&itemIn.ID, &itemIn.Time,
+		err = rows.Scan(
+			&itemIn.ID, &itemIn.Time,
 			&itemIn.SKU, &itemIn.Name,
 			&itemIn.AmountOrders, &itemIn.AmountReceived,
 			&itemIn.PurchasePrice, &itemIn.ReceiptNumber,
@@ -74,7 +75,8 @@ func (ctrl ItemIn) CreateItemIn(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Prepare query error")
 		fmt.Fprintf(w, err.Error())
 	}
-	_, err = stmt.Exec(itemIn.SKU, itemIn.Time, itemIn.AmountOrders,
+	_, err = stmt.Exec(
+		itemIn.SKU, itemIn.Time, itemIn.AmountOrders,
 		itemIn.AmountReceived, itemIn.PurchasePrice,
 		itemIn.ReceiptNumber, itemIn.Notes,
 	)
@@ -102,7 +104,8 @@ func (ctrl ItemIn) UpdateItemIn(w http.ResponseWriter, r *http.Request) {
 		WHERE id=?
 	`)
 	checkInternalServerError(err, w)
-	res, err := stmt.Exec(itemIn.Time, itemIn.SKU,
+	res, err := stmt.Exec(
+		itemIn.Time, itemIn.SKU,
 		itemIn.AmountOrders, itemIn.AmountReceived,
 		itemIn.PurchasePrice, itemIn.ReceiptNumber,
 		itemIn.Notes, itemIn.ID,

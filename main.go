@@ -32,8 +32,10 @@ func main() {
 
 	itemAmountCtrl := &controller.ItemAmount{}
 	itemInCtrl := &controller.ItemIn{}
+	itemOutCtrl := &controller.ItemOut{}
 
 	// declaring routers
+	// item amount
 	r.HandleFunc("/item-amount", itemAmountCtrl.GetItemAmounts).Methods("GET")
 	r.HandleFunc("/item-amount/{sku}", func(w http.ResponseWriter, r *http.Request) {
 		itemAmountCtrl.GetItemAmount(w, r, getSKU(r))
@@ -41,13 +43,17 @@ func main() {
 	r.HandleFunc("/item-amount/create", itemAmountCtrl.CreateItemAmount).Methods("POST")
 	r.HandleFunc("/item-amount/update", itemAmountCtrl.UpdateItemAmount).Methods("POST")
 	r.HandleFunc("/item-amount/delete", itemAmountCtrl.DeleteItemAmount).Methods("POST")
-
+	// item in
 	r.HandleFunc("/item-in", itemInCtrl.GetItemIns).Methods("GET")
 	r.HandleFunc("/item-in/create", itemInCtrl.CreateItemIn).Methods("POST")
 	r.HandleFunc("/item-in/update", itemInCtrl.UpdateItemIn).Methods("POST")
 	r.HandleFunc("/item-in/delete", itemInCtrl.DeleteItemIn).Methods("POST")
-	r.HandleFunc("/item-out", handler).Methods("GET")
-	r.HandleFunc("/item-out/create", handler).Methods("POST")
+	// item out
+	r.HandleFunc("/item-out", itemOutCtrl.GetItemOuts).Methods("GET")
+	r.HandleFunc("/item-out/create", itemOutCtrl.CreateItemOut).Methods("POST")
+	r.HandleFunc("/item-out/update", itemOutCtrl.UpdateItemOut).Methods("POST")
+	r.HandleFunc("/item-out/delete", itemOutCtrl.DeleteItemOut).Methods("POST")
+	// report
 	r.HandleFunc("/item-value-report", handler).Methods("GET")
 	r.HandleFunc("/sales-report", handler).Methods("GET")
 
