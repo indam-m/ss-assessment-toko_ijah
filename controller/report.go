@@ -1,11 +1,12 @@
 package controller
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
-	// "strconv"
 
 	"github.com/indam-m/ss-assessment-toko_ijah/model"
 )
@@ -15,8 +16,8 @@ type Report struct{}
 
 // GetItemValueReport returns the item value report
 func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusBadRequest)
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/", 301)
 	}
 	rows, err := database.Query(`
 		SELECT item_in.sku, item_amount.name,
@@ -44,8 +45,36 @@ func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
 		report.Rows = append(report.Rows, item)
 	}
 	report.PrintedDate = time.Now().Format("2 January 2006")
-	t, err := json.Marshal(report)
+
+	// creating csv file
+	f, err := os.Create("laporan_nilai_barang.csv")
 	checkInternalServerError(err, w)
+	defer f.Close()
+	csvw := csv.NewWriter(f)
+	defer csvw.Flush()
+
+	csvw.Write([]string{"LAPORAN NILAI BARANG"})
+	csvw.Write([]string{""})
+	csvw.Write([]string{"Tanggal Cetak", report.PrintedDate})
+	csvw.Write([]string{"Jumlah SKU", convertToStr(report.AmountOfSKU)})
+	csvw.Write([]string{"Jumlah Total Barang", convertToStr(report.AmountOfItems)})
+	csvw.Write([]string{"Total Nilai", convertToStr(report.TotalValue)})
+	csvw.Write([]string{""})
+	csvw.Write([]string{"SKU", "Nama Item", "Jumlah", "Rata-Rata Harga Beli", "Total"})
+
+	for _, v := range report.Rows {
+		err := csvw.Write([]string{
+			v.SKU,
+			v.Name,
+			convertToStr(v.Amount),
+			convertToStr(v.AveragePurchasePrice),
+			convertToStr(v.Total),
+		})
+		checkInternalServerError(err, w)
+	}
+	// done creating csv file
+
+	t, err := json.Marshal(report)
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, string(t))
 }
@@ -94,7 +123,6 @@ func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
 	)
 
 	for rows.Next() {
-		fmt.Println("aaa")
 		err = rows.Scan(
 			&item.OrderID, &item.Time,
 			&item.SKU, &item.Name,
@@ -114,8 +142,42 @@ func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
 	}
 	report.Date = dateFrom + " - " + dateTo
 	report.PrintedDate = time.Now().Format("2 January 2006")
-	t, err := json.Marshal(report)
+
+	// creating csv file
+	f, err := os.Create("laporan_penjualan.csv")
 	checkInternalServerError(err, w)
+	defer f.Close()
+	csvw := csv.NewWriter(f)
+	defer csvw.Flush()
+
+	csvw.Write([]string{"LAPORAN PENJUALAN"})
+	csvw.Write([]string{""})
+	csvw.Write([]string{"Tanggal Cetak", report.PrintedDate})
+	csvw.Write([]string{"Tanggal", report.Date})
+	csvw.Write([]string{"Total Omzet", convertToStr(report.TotalTurnover)})
+	csvw.Write([]string{"Total Laba Kotor", convertToStr(report.TotalGrossProfit)})
+	csvw.Write([]string{"Total Penjualan", convertToStr(report.TotalSelling)})
+	csvw.Write([]string{"Total Barang", convertToStr(report.TotalItem)})
+	csvw.Write([]string{""})
+	csvw.Write([]string{"ID Pesanan", "Waktu", "SKU", "Nama Barang", "Jumlah", "Harga Jual", "Total", "Harga Beli", "Laba"})
+
+	for _, v := range report.Rows {
+		err := csvw.Write([]string{
+			v.OrderID,
+			getDateTimeStr(v.Time),
+			v.SKU,
+			v.Name,
+			convertToStr(v.Amount),
+			convertToStr(v.SellingPrice),
+			convertToStr(v.Total),
+			convertToStr(v.PurchasePrice),
+			convertToStr(v.Profit),
+		})
+		checkInternalServerError(err, w)
+	}
+	// done creating csv file
+
+	t, err := json.Marshal(report)
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, string(t))
 }

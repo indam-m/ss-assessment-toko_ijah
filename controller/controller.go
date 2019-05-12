@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3" // library to open sqlite3 database
@@ -40,4 +41,17 @@ func getStringDate(str string) string {
 		return time.Now().Format(time.RFC3339)
 	}
 	return t.Format(time.RFC3339)
+}
+
+func convertToStr(val int64) string {
+	str := strconv.FormatInt(val, 10)
+	return str
+}
+
+func getDateTimeStr(str string) string {
+	t, err := time.Parse(time.RFC3339, str)
+	if err != nil {
+		return str
+	}
+	return t.Format("2006/01/02 15:04:05")
 }
