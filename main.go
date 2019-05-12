@@ -22,7 +22,6 @@ func newRouter() *mux.Router {
 
 func getSKU(r *http.Request) string {
 	vars := mux.Vars(r)
-	fmt.Println("skunya ", vars["sku"])
 	return vars["sku"]
 }
 
@@ -32,6 +31,7 @@ func main() {
 	r := newRouter()
 
 	itemAmountCtrl := &controller.ItemAmount{}
+	itemInCtrl := &controller.ItemIn{}
 
 	// declaring routers
 	r.HandleFunc("/item-amount", itemAmountCtrl.GetItemAmounts).Methods("GET")
@@ -41,8 +41,11 @@ func main() {
 	r.HandleFunc("/item-amount/create", itemAmountCtrl.CreateItemAmount).Methods("POST")
 	r.HandleFunc("/item-amount/update", itemAmountCtrl.UpdateItemAmount).Methods("POST")
 	r.HandleFunc("/item-amount/delete", itemAmountCtrl.DeleteItemAmount).Methods("POST")
-	r.HandleFunc("/item-in", handler).Methods("GET")
-	r.HandleFunc("/item-in/create", handler).Methods("POST")
+
+	r.HandleFunc("/item-in", itemInCtrl.GetItemIns).Methods("GET")
+	r.HandleFunc("/item-in/create", itemInCtrl.CreateItemIn).Methods("POST")
+	r.HandleFunc("/item-in/update", itemInCtrl.UpdateItemIn).Methods("POST")
+	r.HandleFunc("/item-in/delete", itemInCtrl.DeleteItemIn).Methods("POST")
 	r.HandleFunc("/item-out", handler).Methods("GET")
 	r.HandleFunc("/item-out/create", handler).Methods("POST")
 	r.HandleFunc("/item-value-report", handler).Methods("GET")

@@ -12,6 +12,14 @@ import (
 // ItemAmount is used as the controller struct
 type ItemAmount struct{}
 
+func getItemAmount(r *http.Request) model.ItemAmount {
+	var itemAmount model.ItemAmount
+	itemAmount.SKU = r.FormValue("SKU")
+	itemAmount.Name = r.FormValue("Name")
+	itemAmount.Quantity, _ = strconv.ParseInt(r.FormValue("Quantity"), 10, 64)
+	return itemAmount
+}
+
 // GetItemAmounts returns list of item_amounts
 func (ctrl ItemAmount) GetItemAmounts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
@@ -55,10 +63,7 @@ func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) 
 	if r.Method != "POST" {
 		http.Redirect(w, r, "/", 301)
 	}
-	var itemAmount model.ItemAmount
-	itemAmount.SKU = r.FormValue("SKU")
-	itemAmount.Name = r.FormValue("Name")
-	itemAmount.Quantity, _ = strconv.ParseInt(r.FormValue("Quantity"), 10, 64)
+	itemAmount := getItemAmount(r)
 
 	// Save to database
 	stmt, err := database.Prepare(`
@@ -84,10 +89,7 @@ func (ctrl ItemAmount) UpdateItemAmount(w http.ResponseWriter, r *http.Request) 
 	if r.Method != "POST" {
 		http.Redirect(w, r, "/", 301)
 	}
-	var itemAmount model.ItemAmount
-	itemAmount.SKU = r.FormValue("SKU")
-	itemAmount.Name = r.FormValue("Name")
-	itemAmount.Quantity, _ = strconv.ParseInt(r.FormValue("Quantity"), 10, 64)
+	itemAmount := getItemAmount(r)
 
 	stmt, err := database.Prepare(`
 		UPDATE item_amount SET name=?, quantity=?
