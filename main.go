@@ -33,6 +33,7 @@ func main() {
 	itemAmountCtrl := &controller.ItemAmount{}
 	itemInCtrl := &controller.ItemIn{}
 	itemOutCtrl := &controller.ItemOut{}
+	reportCtrl := &controller.Report{}
 
 	// declaring routers
 	// item amount
@@ -54,8 +55,8 @@ func main() {
 	r.HandleFunc("/item-out/update", itemOutCtrl.UpdateItemOut).Methods("POST")
 	r.HandleFunc("/item-out/delete", itemOutCtrl.DeleteItemOut).Methods("POST")
 	// report
-	r.HandleFunc("/item-value-report", handler).Methods("GET")
-	r.HandleFunc("/sales-report", handler).Methods("GET")
+	r.HandleFunc("/item-value-report", reportCtrl.GetItemValueReport).Methods("GET")
+	r.HandleFunc("/selling-report", reportCtrl.GetSellingReport).Methods("POST")
 
 	http.ListenAndServe(":9876", r)
 }

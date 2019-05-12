@@ -35,7 +35,7 @@ func checkInternalServerError(err error, w http.ResponseWriter) {
 }
 
 func getStringDate(str string) string {
-	t, err := time.Parse("2006/01/02 15:04", str)
+	t, err := time.Parse("2006/01/02 15:04:05", str)
 	if err != nil {
 		return time.Now().Format(time.RFC3339)
 	}
