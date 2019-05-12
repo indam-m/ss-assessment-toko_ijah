@@ -79,9 +79,10 @@ func (ctrl ItemOut) ExportItemOuts(w http.ResponseWriter, r *http.Request) {
 	csvw := csv.NewWriter(f)
 	defer csvw.Flush()
 
-	csvw.Write([]string{"Waktu", "SKU", "Nama Barang", "Jumlah Keluar", "Harga Jual", "Total", "Catatan"})
+	csvw.Write([]string{"ID", "Waktu", "SKU", "Nama Barang", "Jumlah Keluar", "Harga Jual", "Total", "Catatan"})
 	for _, v := range itemOuts {
 		err := csvw.Write([]string{
+			convertToStr(v.ID),
 			getDateTimeStr(v.Time),
 			v.SKU,
 			v.Name,
