@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/indam-m/ss-assessment-toko_ijah/db"
+	"github.com/indam-m/ss-assessment-toko_ijah/controller"
 )
 
 func newRouter() *mux.Router {
@@ -20,15 +20,27 @@ func newRouter() *mux.Router {
 	return r
 }
 
+func getSKU(r *http.Request) string {
+	vars := mux.Vars(r)
+	fmt.Println("skunya ", vars["sku"])
+	return vars["sku"]
+}
+
 func main() {
-	db.Open()
+	controller.Open()
 	// Declare a new router
 	r := newRouter()
 
-	// This is where the router is useful, it allows us to declare methods that
-	// this path will be valid for
-	r.HandleFunc("/item", handler).Methods("GET")
-	r.HandleFunc("/item/create", handler).Methods("POST")
+	itemAmountCtrl := &controller.ItemAmount{}
+
+	// declaring routers
+	r.HandleFunc("/item-amount", itemAmountCtrl.GetItemAmounts).Methods("GET")
+	r.HandleFunc("/item-amount/{sku}", func(w http.ResponseWriter, r *http.Request) {
+		itemAmountCtrl.GetItemAmount(w, r, getSKU(r))
+	}).Methods("GET")
+	r.HandleFunc("/item-amount/create", itemAmountCtrl.CreateItemAmount).Methods("POST")
+	r.HandleFunc("/item-amount/update", itemAmountCtrl.UpdateItemAmount).Methods("POST")
+	r.HandleFunc("/item-amount/delete", itemAmountCtrl.DeleteItemAmount).Methods("POST")
 	r.HandleFunc("/item-in", handler).Methods("GET")
 	r.HandleFunc("/item-in/create", handler).Methods("POST")
 	r.HandleFunc("/item-out", handler).Methods("GET")
@@ -36,8 +48,6 @@ func main() {
 	r.HandleFunc("/item-value-report", handler).Methods("GET")
 	r.HandleFunc("/sales-report", handler).Methods("GET")
 
-	// We can then pass our router (after declaring all our routes) to this method
-	// (where previously, we were leaving the secodn argument as nil)
 	http.ListenAndServe(":9876", r)
 }
 
