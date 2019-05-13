@@ -1,0 +1,23 @@
+- var formId = exportId
+- var title = "Export " + eximportTitle + "?"
+- action = exportAction
+
+include BaseModal.pug
+    block form
+        block inputs
+            label.w3-label Tanggal Mulai
+            input.w3-input(
+                name="DateFrom"
+                placeholder="2 January 2018"
+            )
+            label.w3-label Tanggal Akhir
+            input.w3-input(
+                name="DateTo"
+                placeholder="2 January 2018"
+            )
+        .w3-center
+            button.w3-btn.w3-red.w3-margin-top.w3-margin-bottom(type="Submit") Export
+            button.w3-btn.w3-teal.w3-margin-top.w3-margin-bottom(
+                type="button"
+                onclick="document.getElementById('export').style.display='none'"
+            ) Batal
