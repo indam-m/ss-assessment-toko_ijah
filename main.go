@@ -11,7 +11,6 @@ import (
 
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.PathPrefix("/assets/").Handler(http.FileServer(http.Dir("./assets/src/dist/")))
 
 	return r
 }
@@ -33,6 +32,7 @@ func main() {
 	controller.Open()
 	// Declare a new router
 	r := mux.NewRouter()
+	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
 
 	itemAmountCtrl := &controller.ItemAmount{}
 	itemInCtrl := &controller.ItemIn{}
