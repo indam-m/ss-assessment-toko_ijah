@@ -1,0 +1,35 @@
+.w3-row
+    .w3-left
+        table.w3-table.w3-border.w3-bordered.w3-hoverable
+            tbody
+                tr
+                    td Tanggal Cetak
+                    td {{.PrintedDate}}
+                tr
+                    td Jumlah SKU
+                    td {{.AmountOfSKU}}
+                tr
+                    td Total Barang
+                    td {{.AmountOfItems}}
+                tr
+                    td Total Nilai
+                    td {{.TotalValue}}
+table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
+    thead
+        tr
+            th No
+            th SKU
+            th Nama Item
+            th Jumlah
+            th Rata-Rata Harga Beli
+            th Total
+    tbody
+        | {{range $index, $row := .Rows}}
+        tr
+            td \#{{$index}}
+            td {{$row.SKU}}
+            td {{$row.Name}}
+            td {{$row.Amount}}
+            td {{$row.AveragePurchasePrice}}
+            td {{$row.Total}}
+        | {{end}}

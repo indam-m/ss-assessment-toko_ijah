@@ -35,6 +35,16 @@ const config = {
             filename: 'item-out.html',
             template: 'src/ItemOut.pug',
             inject: false
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'item-value-report.html',
+            template: 'src/ItemValueReport.pug',
+            inject: false
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'selling-report.html',
+            template: 'src/SellingReport.pug',
+            inject: false
         })
     ]
 };

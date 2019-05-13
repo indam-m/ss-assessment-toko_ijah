@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/csv"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 	"time"
@@ -13,11 +14,7 @@ import (
 // Report is used as the controller struct
 type Report struct{}
 
-// GetItemValueReport returns the item value report
-func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
-	}
+func getItemValueReport(w http.ResponseWriter) model.ItemValueReport {
 	rows, err := database.Query(`
 		SELECT item_in.sku, item_amount.name,
 		SUM (item_in.amount_received) AS amount,
@@ -44,6 +41,25 @@ func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
 		report.Rows = append(report.Rows, item)
 	}
 	report.PrintedDate = time.Now().Format("2 January 2006")
+	return report
+}
+
+// GetItemValueReport goes to the item value report page
+func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
+	report := getItemValueReport(w)
+
+	t, err := template.New("item-value-report.html").Funcs(getTemplateFunc()).ParseFiles("assets/item-value-report.html")
+	checkInternalServerError(err, w)
+	err = t.Execute(w, report)
+	checkInternalServerError(err, w)
+}
+
+// ExportItemValueReport exports the item value report
+func (ctrl Report) ExportItemValueReport(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/", 301)
+	}
+	report := getItemValueReport(w)
 
 	// creating csv file
 	f, err := os.Create("laporan_nilai_barang.csv")
@@ -87,12 +103,7 @@ func getFilteringDate(str string, isFrom bool) string {
 	return theTime.Format("2006-01-02")
 }
 
-// GetSellingReport returns the selling report
-func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
-	}
-
+func getSellingReport(w http.ResponseWriter, r *http.Request) model.SellingReport {
 	dateFrom := r.FormValue("DateFrom")
 	dateTo := r.FormValue("DateTo")
 
@@ -139,6 +150,25 @@ func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
 	}
 	report.Date = dateFrom + " - " + dateTo
 	report.PrintedDate = time.Now().Format("2 January 2006")
+	return report
+}
+
+// GetSellingReport goes to the selling report page
+func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
+	report := getSellingReport(w, r)
+
+	t, err := template.New("selling-report.html").Funcs(getTemplateFunc()).ParseFiles("assets/selling-report.html")
+	checkInternalServerError(err, w)
+	err = t.Execute(w, report)
+	checkInternalServerError(err, w)
+}
+
+// ExportSellingReport exports the selling report to csv file
+func (ctrl Report) ExportSellingReport(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/", 301)
+	}
+	report := getSellingReport(w, r)
 
 	// creating csv file
 	f, err := os.Create("laporan_penjualan.csv")

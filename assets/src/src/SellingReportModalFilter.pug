@@ -1,0 +1,19 @@
+- var title = "Filter Laporan Penjualan"
+- var action = "/selling-report"
+- var formId = "filter-form"
+- var buttonName = "Filter"
+
+include BaseModal.pug
+    block form
+        block inputs
+            label.w3-label Tanggal Mulai
+            input.w3-input(
+                name="DateFrom"
+                placeholder="2 January 2018"
+            )
+            label.w3-label Tanggal Akhir
+            input.w3-input(
+                name="DateTo"
+                placeholder="2 January 2018"
+            )
+        button.w3-btn.w3-teal.w3-margin-top.w3-margin-bottom.w3-right(type="submit")= buttonName

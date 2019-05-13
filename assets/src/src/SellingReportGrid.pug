@@ -1,0 +1,49 @@
+.w3-row
+    .w3-left
+        table.w3-table.w3-border.w3-bordered.w3-hoverable
+            tbody
+                tr
+                    td Tanggal Cetak
+                    td {{.PrintedDate}}
+                tr
+                    td Tanggal
+                    td {{.Date}}
+                tr
+                    td Total Omzet
+                    td {{.TotalTurnover}}
+                tr
+                    td Total Laba Kotor
+                    td {{.TotalGrossProfit}}
+                tr
+                    td Total Penjualan
+                    td {{.TotalSelling}}
+                tr
+                    td Total Barang
+                    td {{.TotalItem}}
+table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
+    thead
+        tr
+            th No
+            th ID Pesanan
+            th Waktu
+            th SKU
+            th Nama Barang
+            th Jumlah
+            th Harga Jual
+            th Total
+            th Harga Beli
+            th Laba
+    tbody
+        | {{range $index, $row := .Rows}}
+        tr
+            td \#{{$index}}
+            td {{$row.OrderID}}
+            td {{convertToUITime $row.Time}}
+            td {{$row.SKU}}
+            td {{$row.Name}}
+            td {{$row.Amount}}
+            td {{$row.SellingPrice}}
+            td {{$row.Total}}
+            td {{$row.PurchasePrice}}
+            td {{$row.Profit}}
+        | {{end}}

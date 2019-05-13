@@ -1,0 +1,33 @@
+extends BaseLayout.pug
+
+prepend head
+    - var pageTitle = "Laporan Penjualan"
+block header
+    header.w3-container.w3-center.w3-teal
+        .w3-row
+            .w3-half
+                .w3-right= pageTitle
+            .w3-half.w3-text-right
+                .w3-right
+                    a.w3-margin-16(
+                        href="/"
+                    )
+                        i.icon.ion-ios-home-outline.w3-xxlarge.hoverbtn
+                    a(
+                        href="#"
+                        onclick="document.getElementById('filter-form').style.display='block'"
+                    )
+                        i.icon.ion-ios-calendar-outline.w3-xxlarge.hoverbtn
+                    a(
+                        href="#"
+                        onclick="document.getElementById('export').style.display='block'"
+                    )
+                        i.icon.ion-ios-download-outline.w3-xxlarge.hoverbtn
+block content
+    include SellingReportGrid.pug
+block footer
+    - var exportAction = "/selling-report/export"
+    - var exportId = "export"
+    - var eximportTitle = pageTitle
+    include SellingReportModalExport.pug
+    include SellingReportModalFilter.pug

@@ -66,8 +66,11 @@ func main() {
 	r.HandleFunc("/item-out/export", itemOutCtrl.ExportItemOuts).Methods("POST")
 	r.HandleFunc("/item-out/import", itemOutCtrl.ImportItemOuts).Methods("POST")
 	// report
-	r.HandleFunc("/item-value-report", reportCtrl.GetItemValueReport).Methods("POST")
+	r.HandleFunc("/item-value-report", reportCtrl.GetItemValueReport).Methods("GET")
+	r.HandleFunc("/item-value-report/export", reportCtrl.ExportItemValueReport).Methods("POST")
+	r.HandleFunc("/selling-report", reportCtrl.GetSellingReport).Methods("GET")
 	r.HandleFunc("/selling-report", reportCtrl.GetSellingReport).Methods("POST")
+	r.HandleFunc("/selling-report/export", reportCtrl.ExportSellingReport).Methods("POST")
 
 	port := getPort()
 	fmt.Println("Open http://localhost" + port + " to get started!")
