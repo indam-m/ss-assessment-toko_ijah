@@ -100,9 +100,7 @@ func (ctrl ItemIn) ExportItemIns(w http.ResponseWriter, r *http.Request) {
 	}
 	// done creating csv file
 
-	t, err := json.Marshal(itemIns)
-	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	fmt.Fprintln(w, exportSuccess)
 }
 
 // CreateItemIn creates an item_in from request
@@ -132,7 +130,7 @@ func (ctrl ItemIn) CreateItemIn(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, err.Error())
 	}
 	txt, _ := json.Marshal(itemIn)
-	fmt.Fprintln(w, "Creating succeeded!")
+	fmt.Fprintln(w, createSuccess)
 	fmt.Fprintf(w, string(txt))
 }
 
@@ -161,7 +159,7 @@ func (ctrl ItemIn) UpdateItemIn(w http.ResponseWriter, r *http.Request) {
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
 	txt, _ := json.Marshal(itemIn)
-	fmt.Fprintln(w, "Updating succeeded!")
+	fmt.Fprintln(w, updateSuccess)
 	fmt.Fprintf(w, string(txt))
 }
 
@@ -177,7 +175,7 @@ func (ctrl ItemIn) DeleteItemIn(w http.ResponseWriter, r *http.Request) {
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, "Deleting succeeded!")
+	fmt.Fprintf(w, deleteSuccess)
 }
 
 // ImportItemIns imports item_in list from csv file
@@ -218,6 +216,6 @@ func (ctrl ItemIn) ImportItemIns(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err == nil {
-		fmt.Fprintln(w, "Importing succeeded!")
+		fmt.Fprintln(w, importSuccess)
 	}
 }

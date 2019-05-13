@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -74,9 +73,7 @@ func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
 	}
 	// done creating csv file
 
-	t, err := json.Marshal(report)
-	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	fmt.Fprintln(w, exportSuccess)
 }
 
 func getFilteringDate(str string, isFrom bool) string {
@@ -177,7 +174,5 @@ func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
 	}
 	// done creating csv file
 
-	t, err := json.Marshal(report)
-	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	fmt.Fprintln(w, exportSuccess)
 }

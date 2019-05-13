@@ -97,9 +97,7 @@ func (ctrl ItemOut) ExportItemOuts(w http.ResponseWriter, r *http.Request) {
 	}
 	// done creating csv file
 
-	t, err := json.Marshal(itemOuts)
-	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	fmt.Fprintln(w, exportSuccess)
 }
 
 // CreateItemOut creates an item_out from request
@@ -129,7 +127,7 @@ func (ctrl ItemOut) CreateItemOut(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, err.Error())
 	}
 	txt, _ := json.Marshal(itemOut)
-	fmt.Fprintln(w, "Creating succeeded!")
+	fmt.Fprintln(w, createSuccess)
 	fmt.Fprintf(w, string(txt))
 }
 
@@ -157,7 +155,7 @@ func (ctrl ItemOut) UpdateItemOut(w http.ResponseWriter, r *http.Request) {
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
 	txt, _ := json.Marshal(itemOut)
-	fmt.Fprintln(w, "Updating succeeded!")
+	fmt.Fprintln(w, updateSuccess)
 	fmt.Fprintf(w, string(txt))
 }
 
@@ -173,7 +171,7 @@ func (ctrl ItemOut) DeleteItemOut(w http.ResponseWriter, r *http.Request) {
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, "Deleting succeeded!")
+	fmt.Fprintf(w, deleteSuccess)
 }
 
 // ImportItemOuts imports item_out list from csv file
@@ -222,6 +220,6 @@ func (ctrl ItemOut) ImportItemOuts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err == nil {
-		fmt.Fprintln(w, "Importing succeeded!")
+		fmt.Fprintln(w, importSuccess)
 	}
 }

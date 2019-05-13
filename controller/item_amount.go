@@ -74,9 +74,7 @@ func (ctrl ItemAmount) ExportItemAmounts(w http.ResponseWriter, r *http.Request)
 	}
 	// done creating csv file
 
-	t, err := json.Marshal(itemAmounts)
-	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	fmt.Fprintln(w, exportSuccess)
 }
 
 // GetItemAmount returns an item_amounts based on SKU
@@ -121,7 +119,7 @@ func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	txt, _ := json.Marshal(itemAmount)
-	fmt.Fprintln(w, "Creating succeeded!")
+	fmt.Fprintln(w, createSuccess)
 	fmt.Fprintf(w, string(txt))
 }
 
@@ -142,7 +140,7 @@ func (ctrl ItemAmount) UpdateItemAmount(w http.ResponseWriter, r *http.Request) 
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
 	txt, _ := json.Marshal(itemAmount)
-	fmt.Fprintln(w, "Updating succeeded!")
+	fmt.Fprintln(w, updateSuccess)
 	fmt.Fprintf(w, string(txt))
 }
 
@@ -158,7 +156,7 @@ func (ctrl ItemAmount) DeleteItemAmount(w http.ResponseWriter, r *http.Request) 
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, "Deleting succeeded!")
+	fmt.Fprintf(w, deleteSuccess)
 }
 
 // ImportItemAmounts imports item_amount list from csv file
@@ -195,6 +193,6 @@ func (ctrl ItemAmount) ImportItemAmounts(w http.ResponseWriter, r *http.Request)
 		}
 	}
 	if err == nil {
-		fmt.Fprintln(w, "Importing succeeded!")
+		fmt.Fprintln(w, importSuccess)
 	}
 }

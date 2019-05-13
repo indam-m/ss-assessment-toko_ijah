@@ -11,6 +11,14 @@ import (
 	_ "github.com/mattn/go-sqlite3" // library to open sqlite3 database
 )
 
+const (
+	createSuccess = "Creating succeeded!"
+	updateSuccess = "Updating succeeded!"
+	deleteSuccess = "Deleting succeeded!"
+	exportSuccess = "Exporting succeeded!"
+	importSuccess = "Importing succeeded!"
+)
+
 var (
 	database *sql.DB
 	dbErr    error
