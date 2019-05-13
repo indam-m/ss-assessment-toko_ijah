@@ -27,12 +27,3 @@ block content
             a.w3-btn-block.w3-teal(
                 href="/selling-report"
             ) Laporan Penjualan
-block footer
-    - var eximportTitle = "Laporan Nilai Barang"
-    - var exportAction = "/item-value-report"
-    - var exportId = "item-value-export"
-    include BaseModalExport.pug
-    - var eximportTitle = "Laporan Penjualan"
-    - var exportAction = "/selling-report"
-    - var exportId = "selling-export"
-    include SellingReportModalExport.pug
