@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -43,10 +44,10 @@ func (ctrl ItemAmount) GetItemAmounts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusBadRequest)
 	}
 	itemAmounts := getItemAmountList(w, r)
-
-	t, err := json.Marshal(itemAmounts)
+	t, err := template.New("item-amount.html").ParseFiles("assets/item-amount.html")
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	err = t.Execute(w, itemAmounts)
+	checkInternalServerError(err, w)
 }
 
 // ExportItemAmounts exports list of item_amounts
@@ -75,6 +76,7 @@ func (ctrl ItemAmount) ExportItemAmounts(w http.ResponseWriter, r *http.Request)
 	// done creating csv file
 
 	fmt.Fprintln(w, exportSuccess)
+	http.Redirect(w, r, "/item-amount", 301)
 }
 
 // GetItemAmount returns an item_amounts based on SKU
@@ -121,6 +123,7 @@ func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) 
 	txt, _ := json.Marshal(itemAmount)
 	fmt.Fprintln(w, createSuccess)
 	fmt.Fprintf(w, string(txt))
+	http.Redirect(w, r, "/item-amount", 301)
 }
 
 // UpdateItemAmount updates an item_amount from request
@@ -142,6 +145,7 @@ func (ctrl ItemAmount) UpdateItemAmount(w http.ResponseWriter, r *http.Request) 
 	txt, _ := json.Marshal(itemAmount)
 	fmt.Fprintln(w, updateSuccess)
 	fmt.Fprintf(w, string(txt))
+	http.Redirect(w, r, "/item-amount", 301)
 }
 
 // DeleteItemAmount deletes an item_amount using requested SKU
@@ -157,6 +161,7 @@ func (ctrl ItemAmount) DeleteItemAmount(w http.ResponseWriter, r *http.Request) 
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
 	fmt.Fprintf(w, deleteSuccess)
+	http.Redirect(w, r, "/item-amount", 301)
 }
 
 // ImportItemAmounts imports item_amount list from csv file

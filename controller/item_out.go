@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -62,9 +63,10 @@ func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
 	}
 	itemOuts := getItemOutList(w, r)
 
-	t, err := json.Marshal(itemOuts)
+	t, err := template.New("item-out.html").ParseFiles("assets/item-out.html")
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	err = t.Execute(w, itemOuts)
+	checkInternalServerError(err, w)
 }
 
 // ExportItemOuts exports list of item_outs

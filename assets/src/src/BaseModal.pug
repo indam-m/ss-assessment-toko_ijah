@@ -1,0 +1,18 @@
+.w3-container
+    .w3-modal(
+        id=formId
+    )
+        .w3-modal-content.w3-card-8.w3-animate-zoom(
+            style="max-width: 600px;"
+        )
+            .w3-container.w3-teal
+                h2= title
+                span.w3-closebtn.w3-hover-red.w3-container.w3-padding-8.w3-display-topright(
+                    onclick="document.getElementById('" + formId +  "').style.display='none'"
+                ) &times;
+            form.w3-container(
+                slot="form"
+                action=action
+                method="POST"
+            )
+                block form

@@ -1,0 +1,22 @@
+- var title = "Buat Barang Baru"
+- var action = "/item-amount/create"
+- var formId = "create-form"
+- var buttonName = "Simpan"
+
+include BaseModal.pug
+    block form
+        block inputs
+            label.w3-label SKU
+            input.w3-input(
+                name="SKU"
+            )
+            label.w3-label Nama Item
+            input.w3-input(
+                name="Name"
+            )
+            label.w3-label Jumlah Sekarang
+            input.w3-input(
+                name="Quantity"
+                type="number"
+            )
+        button.w3-btn.w3-teal.w3-margin-top.w3-margin-bottom.w3-right(type="submit")= buttonName

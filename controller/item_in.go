@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -63,9 +64,10 @@ func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
 	}
 	itemIns := getItemInList(w, r)
 
-	t, err := json.Marshal(itemIns)
+	t, err := template.New("item-in.html").ParseFiles("assets/item-in.html")
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, string(t))
+	err = t.Execute(w, itemIns)
+	checkInternalServerError(err, w)
 }
 
 // ExportItemIns exports list of item_ins

@@ -12,6 +12,7 @@
 *.out
 
 *.csv
+/assets/src/node_modules
 /vendor
 /config.yaml
 /ss-assessment-toko_ijah

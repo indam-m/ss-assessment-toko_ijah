@@ -1,0 +1,11 @@
+extends BaseLayout.pug
+
+prepend head
+    - var pageTitle = "Catatan Jumlah Barang"
+block content
+    include ItemAmountGrid.pug
+block footer
+    - var deleteAction = "/item-amount/delete"
+    include ItemAmountModalCreate.pug
+    include ItemAmountModalUpdate.pug
+    include BaseModalDelete.pug

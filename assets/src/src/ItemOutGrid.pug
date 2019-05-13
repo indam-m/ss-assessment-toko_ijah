@@ -1,0 +1,30 @@
+table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
+    thead
+        tr
+            th No
+            th ID
+            th Waktu
+            th SKU
+            th Nama Barang
+            th Jumlah Keluar
+            th Harga Jual
+            th Total
+            th ID Pesanan
+            th Catatan
+            th Actions
+    tbody
+        | {{range $index, $itemOut := .}}
+        tr
+            td \#{{$index}}
+            td {{$itemOut.ID}}
+            td {{$itemOut.Time}}
+            td {{$itemOut.SKU}}
+            td {{$itemOut.Name}}
+            td {{$itemOut.AmountOut}}
+            td {{$itemOut.SellingPrice}}
+            td {{$itemOut.Total}}
+            td {{$itemOut.OrderID}}
+            td {{$itemOut.Notes}}
+            td
+                include BaseAction.pug
+        | {{end}}

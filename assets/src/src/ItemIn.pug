@@ -1,0 +1,11 @@
+extends BaseLayout.pug
+
+prepend head
+    - var pageTitle = "Catatan Barang Masuk"
+block content
+    include ItemInGrid.pug
+block footer
+    - var deleteAction = "/item-in/delete"
+    include ItemInModalCreate.pug
+    include ItemInModalUpdate.pug
+    include BaseModalDelete.pug

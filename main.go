@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/indam-m/ss-assessment-toko_ijah/controller"
@@ -10,12 +11,7 @@ import (
 
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/hello", handler).Methods("GET")
-
-	assets := "/assets/"
-	staticFileDirectory := http.Dir(assets)
-	staticFileHandler := http.StripPrefix(assets, http.FileServer(staticFileDirectory))
-	r.PathPrefix(assets).Handler(staticFileHandler).Methods("GET")
+	r.PathPrefix("/assets/").Handler(http.FileServer(http.Dir("./assets/src/dist/")))
 
 	return r
 }
@@ -25,10 +21,18 @@ func getSKU(r *http.Request) string {
 	return vars["sku"]
 }
 
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "9876"
+	}
+	return ":" + port
+}
+
 func main() {
 	controller.Open()
 	// Declare a new router
-	r := newRouter()
+	r := mux.NewRouter()
 
 	itemAmountCtrl := &controller.ItemAmount{}
 	itemInCtrl := &controller.ItemIn{}
@@ -64,9 +68,7 @@ func main() {
 	r.HandleFunc("/item-value-report", reportCtrl.GetItemValueReport).Methods("POST")
 	r.HandleFunc("/selling-report", reportCtrl.GetSellingReport).Methods("POST")
 
-	http.ListenAndServe(":9876", r)
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
+	port := getPort()
+	fmt.Println("Open http://localhost" + port + " to get started!")
+	http.ListenAndServe(port, r)
 }

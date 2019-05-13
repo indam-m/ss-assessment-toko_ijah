@@ -1,0 +1,41 @@
+- var title = "Buat Barang Masuk Baru"
+- var action = "/item-in/create"
+- var formId = "create-form"
+- var buttonName = "Simpan"
+
+includes BaseModal.pug
+    block form
+        block inputs
+            label.w3-label Waktu
+            input.w3-input(
+                name="Time"
+                type="datetime"
+            )
+            label.w3-label SKU
+            input.w3-input(
+                name="SKU"
+            )
+            label.w3-label Jumlah Pemesanan
+            input.w3-input(
+                name="AmountOrders"
+                type="number"
+            )
+            label.w3-label Jumlah Diterima
+            input.w3-input(
+                name="AmountReceived"
+                type="number"
+            )
+            label.w3-label Harga Beli
+            input.w3-input(
+                name="PurchasePrice"
+                type="number"
+            )
+            label.w3-label Nomer Kwitansi
+            input.w3-input(
+                name="ReceiptNumber"
+            )
+            label.w3-label Catatan
+            input.w3-input(
+                name="Notes"
+            )
+        button.w3-btn.w3-teal.w3-margin-top.w3-margin-bottom.w3-right(type="submit")= buttonName

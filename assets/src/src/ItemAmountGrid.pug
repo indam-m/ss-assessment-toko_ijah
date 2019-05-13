@@ -1,0 +1,18 @@
+table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
+    thead
+        tr
+            th No
+            th SKU
+            th Nama Item
+            th Jumlah Sekarang
+            th Actions
+    tbody
+        | {{range $index, $itemAmount := .}}
+        tr
+            td \#{{$index}}
+            td {{$itemAmount.SKU}}
+            td {{$itemAmount.Name}}
+            td {{$itemAmount.Quantity}}
+            td
+                include BaseAction.pug
+        | {{end}}

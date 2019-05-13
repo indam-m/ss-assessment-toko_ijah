@@ -1,0 +1,45 @@
+- var title = "Update Barang Masuk"
+- var action = "/item-in/update"
+- var formId = "update-form"
+- var buttonName = "Update"
+
+include BaseModal.pug
+    block form
+        block inputs
+            input.w3-input#id-to-update(
+                name="ID"
+                type="hidden"
+            )
+            label.w3-label Waktu
+            input.w3-input(
+                name="Time"
+                type="datetime"
+            )
+            label.w3-label SKU
+            input.w3-input(
+                name="SKU"
+            )
+            label.w3-label Jumlah Pemesanan
+            input.w3-input(
+                name="AmountOrders"
+                type="number"
+            )
+            label.w3-label Jumlah Diterima
+            input.w3-input(
+                name="AmountReceived"
+                type="number"
+            )
+            label.w3-label Harga Beli
+            input.w3-input(
+                name="PurchasePrice"
+                type="number"
+            )
+            label.w3-label Nomer Kwitansi
+            input.w3-input(
+                name="ReceiptNumber"
+            )
+            label.w3-label Catatan
+            input.w3-input(
+                name="Notes"
+            )
+        button.w3-btn.w3-teal.w3-margin-top.w3-margin-bottom.w3-right(type="submit")= buttonName

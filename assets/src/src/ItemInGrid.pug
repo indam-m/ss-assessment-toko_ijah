@@ -1,0 +1,32 @@
+table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
+    thead
+        tr
+            th No
+            th ID
+            th Waktu
+            th SKU
+            th Nama Barang
+            th Jumlah Pemesanan
+            th Jumlah Diterima
+            th Harga Beli
+            th Total
+            th Nomer Kwitansi
+            th Catatan
+            th Actions
+    tbody
+        | {{range $index, $itemIn := .}}
+        tr
+            td \#{{$index}}
+            td {{$itemIn.ID}}
+            td {{$itemIn.Time}}
+            td {{$itemIn.SKU}}
+            td {{$itemIn.Name}}
+            td {{$itemIn.AmountOrders}}
+            td {{$itemIn.AmountReceived}}
+            td {{$itemIn.PurchasePrice}}
+            td {{$itemIn.Total}}
+            td {{$itemIn.ReceiptNumber}}
+            td {{$itemIn.Notes}}
+            td
+                include BaseAction.pug
+        | {{end}}
