@@ -38,12 +38,40 @@ func checkInternalServerError(err error, w http.ResponseWriter) {
 }
 
 func convertDateForSQL(str string) string {
-	t, err := time.Parse("2006/01/02 15:04:05", str)
-	if err != nil {
-		t, err = time.Parse("2006/01/02 15:04", str)
-		if err != nil {
-			return time.Now().Format(time.RFC3339)
+	re := regexp.MustCompile("(\\d{4})[/-](\\d{1,2})[/-](\\d{1,2}) (\\d{1,2}):(\\d{1,2})")
+	var locStr string
+	match := re.FindStringSubmatch(str)
+	for i, val := range match {
+		if i > 0 {
+			if len(val) == 1 {
+				locStr += "0"
+			}
+			locStr += val
+			if i < 3 {
+				locStr += "/"
+			} else if i > 3 {
+				locStr += ":"
+			} else {
+				locStr += " "
+			}
 		}
+	}
+	// adding second
+	re = regexp.MustCompile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})")
+	match = re.FindStringSubmatch(str)
+	if len(match) > 0 {
+		sec := match[3]
+		if len(sec) == 1 {
+			locStr += "0"
+		}
+		locStr += sec
+	} else {
+		locStr += "00"
+	}
+
+	t, err := time.Parse("2006/01/02 15:04:05", locStr)
+	if err != nil {
+		return time.Now().Format(time.RFC3339)
 	}
 	return t.Format(time.RFC3339)
 }
