@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"fmt"
+	"html/template"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -36,6 +37,14 @@ func Open() {
 	if dbErr != nil {
 		panic(dbErr)
 	}
+}
+
+// GetHome handles homepage
+func GetHome(w http.ResponseWriter, r *http.Request) {
+	t, err := template.New("index.html").ParseFiles("assets/index.html")
+	checkInternalServerError(err, w)
+	err = t.Execute(w, nil)
+	checkInternalServerError(err, w)
 }
 
 func checkInternalServerError(err error, w http.ResponseWriter) {

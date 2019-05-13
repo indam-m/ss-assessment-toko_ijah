@@ -40,6 +40,7 @@ func main() {
 	reportCtrl := &controller.Report{}
 
 	// declaring routers
+	r.HandleFunc("/", controller.GetHome).Methods("GET")
 	// item amount
 	r.HandleFunc("/item-amount", itemAmountCtrl.GetItemAmounts).Methods("GET")
 	r.HandleFunc("/item-amount/{sku}", func(w http.ResponseWriter, r *http.Request) {

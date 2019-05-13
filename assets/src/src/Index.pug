@@ -1,0 +1,40 @@
+extends BaseLayout.pug
+
+prepend head
+ - var pageTitle = "Home"
+block header
+block content
+    .w3-container.w3-center
+        .w3-row.w3-padding-16
+            h1 Selamat Datang Di Toko Ijah
+        .w3-row.w3-padding-16
+            a.w3-btn-block.w3-teal(
+                href="/item-amount"
+            ) Catatan Jumlah 
+        .w3-row.w3-padding-16
+            a.w3-btn-block.w3-teal(
+                href="/item-in"
+            ) Catatan Barang Masuk
+        .w3-row.w3-padding-16
+            a.w3-btn-block.w3-teal(
+                href="/item-out"
+            ) Catatan Barang Keluar
+        .w3-row.w3-padding-16
+            a.w3-btn-block.w3-teal(
+                href="#"
+                onclick="document.getElementById('item-value-export').style.display='block'"
+            ) Export Laporan Nilai Barang
+        .w3-row.w3-padding-16
+            a.w3-btn-block.w3-teal(
+                href="#"
+                onclick="document.getElementById('selling-export').style.display='block'"
+            ) Export Laporan Penjualan
+block footer
+    - var eximportTitle = "Laporan Nilai Barang"
+    - var exportAction = "/item-value-report"
+    - var exportId = "item-value-export"
+    include BaseModalExport.pug
+    - var eximportTitle = "Laporan Penjualan"
+    - var exportAction = "/selling-report"
+    - var exportId = "selling-export"
+    include BaseModalExport.pug

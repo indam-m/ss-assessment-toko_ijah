@@ -3,13 +3,13 @@
 - var formId = "create-form"
 - var buttonName = "Simpan"
 
-includes BaseModal.pug
+include BaseModal.pug
     block form
         block inputs
             label.w3-label Waktu
             input.w3-input(
                 name="Time"
-                type="datetime"
+                placeholder="YYYY/MM/dd hh:mm:ss"
             )
             label.w3-label SKU
             input.w3-input(

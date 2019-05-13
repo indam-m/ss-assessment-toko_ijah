@@ -2,10 +2,18 @@ extends BaseLayout.pug
 
 prepend head
     - var pageTitle = "Catatan Barang Keluar"
+append header
 block content
     include ItemOutGrid.pug
 block footer
     - var deleteAction = "/item-out/delete"
+    - var delVar = "ID"
+    - var importAction = "/item-out/import"
+    - var exportAction = "/item-out/export"
+    - var exportId = "export"
+    - var eximportTitle = pageTitle
     include ItemOutModalCreate.pug
     include ItemOutModalUpdate.pug
     include BaseModalDelete.pug
+    include BaseModalExport.pug
+    include BaseModalImport.pug

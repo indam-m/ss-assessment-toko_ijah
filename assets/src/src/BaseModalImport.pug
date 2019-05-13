@@ -1,0 +1,17 @@
+- var formId = "import"
+- var title = "Import " + eximportTitle
+- action = importAction
+
+include BaseModal.pug
+    block form
+        block inputs
+            label.w3-label Nama File
+            input.w3-input(
+                name="FileName"
+            )
+        .w3-center
+            button.w3-btn.w3-red.w3-margin-top.w3-margin-bottom(type="Submit") Import
+            button.w3-btn.w3-teal.w3-margin-top.w3-margin-bottom(
+                type="button"
+                onclick="document.getElementById('import').style.display='none'"
+            ) Batal

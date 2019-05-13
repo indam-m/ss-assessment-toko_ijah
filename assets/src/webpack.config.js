@@ -17,6 +17,11 @@ const config = {
     },
     plugins: [
         new HtmlWebpackPlugin({
+            filename: 'index.html',
+            template: 'src/Index.pug',
+            inject: false
+        }),
+        new HtmlWebpackPlugin({
             filename: 'item-amount.html',
             template: 'src/ItemAmount.pug',
             inject: false
