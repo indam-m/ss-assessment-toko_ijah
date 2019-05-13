@@ -18,7 +18,7 @@ table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
         tr
             td \#{{$index}}
             td {{$itemIn.ID}}
-            td {{$itemIn.Time}}
+            td {{convertToUITime $itemIn.Time}}
             td {{$itemIn.SKU}}
             td {{$itemIn.Name}}
             td {{$itemIn.AmountOrders}}

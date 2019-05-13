@@ -63,7 +63,7 @@ func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
 	}
 	itemOuts := getItemOutList(w, r)
 
-	t, err := template.New("item-out.html").ParseFiles("assets/item-out.html")
+	t, err := template.New("item-out.html").Funcs(getTemplateFunc()).ParseFiles("assets/item-out.html")
 	checkInternalServerError(err, w)
 	err = t.Execute(w, itemOuts)
 	checkInternalServerError(err, w)

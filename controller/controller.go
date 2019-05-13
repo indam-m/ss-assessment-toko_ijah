@@ -133,3 +133,9 @@ func execImport(sqlStr string, vals []interface{}, w http.ResponseWriter) error 
 	}
 	return err
 }
+
+func getTemplateFunc() map[string]interface{} {
+	return template.FuncMap{
+		"convertToUITime": convertToUITime,
+	}
+}
