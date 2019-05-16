@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/csv"
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -13,6 +12,11 @@ import (
 
 // Report is used as the controller struct
 type Report struct{}
+
+var (
+	itemValueReportHome = "/item-value-report"
+	sellingReportHome   = "/selling-report"
+)
 
 func getItemValueReport(w http.ResponseWriter) model.ItemValueReport {
 	rows, err := database.Query(`
@@ -46,6 +50,8 @@ func getItemValueReport(w http.ResponseWriter) model.ItemValueReport {
 
 // GetItemValueReport goes to the item value report page
 func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
+	alertFromCookie(w, r)
+
 	report := getItemValueReport(w)
 
 	t, err := template.New("item-value-report.html").Funcs(getTemplateFunc()).ParseFiles("assets/item-value-report.html")
@@ -57,7 +63,7 @@ func (ctrl Report) GetItemValueReport(w http.ResponseWriter, r *http.Request) {
 // ExportItemValueReport exports the item value report
 func (ctrl Report) ExportItemValueReport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		redirectWithAlert(w, r, itemValueReportHome, "")
 	}
 	report := getItemValueReport(w)
 
@@ -89,7 +95,7 @@ func (ctrl Report) ExportItemValueReport(w http.ResponseWriter, r *http.Request)
 	}
 	// done creating csv file
 
-	fmt.Fprintln(w, exportSuccess)
+	redirectWithAlert(w, r, itemValueReportHome, exportSuccess)
 }
 
 func getFilteringDate(str string, isFrom bool) string {
@@ -155,6 +161,8 @@ func getSellingReport(w http.ResponseWriter, r *http.Request) model.SellingRepor
 
 // GetSellingReport goes to the selling report page
 func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
+	alertFromCookie(w, r)
+
 	report := getSellingReport(w, r)
 
 	t, err := template.New("selling-report.html").Funcs(getTemplateFunc()).ParseFiles("assets/selling-report.html")
@@ -166,7 +174,7 @@ func (ctrl Report) GetSellingReport(w http.ResponseWriter, r *http.Request) {
 // ExportSellingReport exports the selling report to csv file
 func (ctrl Report) ExportSellingReport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/", 301)
+		redirectWithAlert(w, r, sellingReportHome, "")
 	}
 	report := getSellingReport(w, r)
 
@@ -204,5 +212,5 @@ func (ctrl Report) ExportSellingReport(w http.ResponseWriter, r *http.Request) {
 	}
 	// done creating csv file
 
-	fmt.Fprintln(w, exportSuccess)
+	redirectWithAlert(w, r, sellingReportHome, exportSuccess)
 }

@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	createSuccess = "Creating succeeded!"
-	updateSuccess = "Updating succeeded!"
-	deleteSuccess = "Deleting succeeded!"
-	exportSuccess = "Exporting succeeded!"
-	importSuccess = "Importing succeeded!"
+	createSuccess = "Penyimpanan data berhasil!"
+	updateSuccess = "Pengubahan data berhasil!"
+	deleteSuccess = "Penghapusan data berhasil!"
+	exportSuccess = "Ekspor data berhasil!"
+	importSuccess = "Impor data berhasil!"
 )
 
 var (
@@ -137,5 +137,25 @@ func execImport(sqlStr string, vals []interface{}, w http.ResponseWriter) error 
 func getTemplateFunc() map[string]interface{} {
 	return template.FuncMap{
 		"convertToUITime": convertToUITime,
+	}
+}
+
+func redirectWithAlert(w http.ResponseWriter, r *http.Request, url string, message string) {
+	if len(message) > 0 {
+		cookie := http.Cookie{
+			Name:   "Message",
+			Value:  message,
+			MaxAge: 1,
+			Path:   url,
+		}
+		http.SetCookie(w, &cookie)
+	}
+	http.Redirect(w, r, url, 301)
+}
+
+func alertFromCookie(w http.ResponseWriter, r *http.Request) {
+	c, cErr := r.Cookie("Message")
+	if cErr == nil && c.Value != "" {
+		w.Write([]byte("<script>alert('" + c.Value + "')</script>"))
 	}
 }

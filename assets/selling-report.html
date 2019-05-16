@@ -2,8 +2,12 @@
     var editForm = document.getElementById('update-form');
     // display update form
     editForm.style.display = 'block';
-    var id = e.parentNode.parentNode.childNodes[1].innerText;
-    document.getElementById('id-to-update').value = id;
+    e.parentNode.parentNode.childNodes.forEach(function (node) {
+        if (node.id) {
+            var name = node.id.replace(/td-\d-/g, "");
+            document.getElementById('update-' + name).value = node.innerText;
+        }
+    })
 }
 function deleteItem(e) {
     var deleteForm = document.getElementById('delete-form');

@@ -7,16 +7,16 @@ include BaseModal.pug
     block form
         block inputs
             label.w3-label SKU
-            input.w3-input#id-to-update(
+            input.w3-input#update-id(
                 name="SKU"
                 readonly="readonly"
             )
             label.w3-label Nama Item
-            input.w3-input(
+            input.w3-input#update-name(
                 name="Name"
             )
             label.w3-label Jumlah Sekarang
-            input.w3-input(
+            input.w3-input#update-quantity(
                 name="Quantity"
                 type="number"
             )

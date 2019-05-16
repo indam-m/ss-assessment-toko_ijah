@@ -2,8 +2,6 @@ package controller
 
 import (
 	"encoding/csv"
-	"encoding/json"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -16,6 +14,8 @@ import (
 
 // ItemOut is used as the controller struct
 type ItemOut struct{}
+
+var itemOutHome = "/item-out"
 
 func getInitItemOut(r *http.Request) model.ItemOut {
 	var itemOut model.ItemOut
@@ -61,6 +61,8 @@ func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusBadRequest)
 	}
+	alertFromCookie(w, r)
+
 	itemOuts := getItemOutList(w, r)
 
 	t, err := template.New("item-out.html").Funcs(getTemplateFunc()).ParseFiles("assets/item-out.html")
@@ -72,7 +74,7 @@ func (ctrl ItemOut) GetItemOuts(w http.ResponseWriter, r *http.Request) {
 // ExportItemOuts exports list of item_outs
 func (ctrl ItemOut) ExportItemOuts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-out", 301)
+		redirectWithAlert(w, r, itemOutHome, "")
 	}
 	itemOuts := getItemOutList(w, r)
 
@@ -98,14 +100,13 @@ func (ctrl ItemOut) ExportItemOuts(w http.ResponseWriter, r *http.Request) {
 		checkInternalServerError(err, w)
 	}
 	// done creating csv file
-
-	fmt.Fprintln(w, exportSuccess)
+	redirectWithAlert(w, r, itemOutHome, exportSuccess)
 }
 
 // CreateItemOut creates an item_out from request
 func (ctrl ItemOut) CreateItemOut(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-out", 301)
+		redirectWithAlert(w, r, itemOutHome, "")
 	}
 	itemOut := getInitItemOut(r)
 
@@ -116,8 +117,7 @@ func (ctrl ItemOut) CreateItemOut(w http.ResponseWriter, r *http.Request) {
 		VALUES(?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
-		fmt.Fprintln(w, "Prepare query error")
-		fmt.Fprintf(w, err.Error())
+		redirectWithAlert(w, r, itemAmountHome, "Prepare query error: "+err.Error())
 	}
 	_, err = stmt.Exec(
 		itemOut.SKU, itemOut.Time,
@@ -125,18 +125,15 @@ func (ctrl ItemOut) CreateItemOut(w http.ResponseWriter, r *http.Request) {
 		itemOut.OrderID, itemOut.Notes,
 	)
 	if err != nil {
-		fmt.Fprintln(w, "Execute query error")
-		fmt.Fprintf(w, err.Error())
+		redirectWithAlert(w, r, itemAmountHome, "Execute query error: "+err.Error())
 	}
-	txt, _ := json.Marshal(itemOut)
-	fmt.Fprintln(w, createSuccess)
-	fmt.Fprintf(w, string(txt))
+	redirectWithAlert(w, r, itemOutHome, createSuccess)
 }
 
 // UpdateItemOut updates an item_out from request using item_out ID
 func (ctrl ItemOut) UpdateItemOut(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-out", 301)
+		redirectWithAlert(w, r, itemOutHome, "")
 	}
 	itemOut := getInitItemOut(r)
 
@@ -156,15 +153,13 @@ func (ctrl ItemOut) UpdateItemOut(w http.ResponseWriter, r *http.Request) {
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	txt, _ := json.Marshal(itemOut)
-	fmt.Fprintln(w, updateSuccess)
-	fmt.Fprintf(w, string(txt))
+	redirectWithAlert(w, r, itemOutHome, updateSuccess)
 }
 
 // DeleteItemOut deletes an item_out using requested ID
 func (ctrl ItemOut) DeleteItemOut(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-out", 301)
+		redirectWithAlert(w, r, itemOutHome, "")
 	}
 	var itemID = r.FormValue("ID")
 	stmt, err := database.Prepare("DELETE FROM item_out WHERE id=?")
@@ -173,13 +168,13 @@ func (ctrl ItemOut) DeleteItemOut(w http.ResponseWriter, r *http.Request) {
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, deleteSuccess)
+	redirectWithAlert(w, r, itemOutHome, deleteSuccess)
 }
 
 // ImportItemOuts imports item_out list from csv file
 func (ctrl ItemOut) ImportItemOuts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-out", 301)
+		redirectWithAlert(w, r, itemOutHome, "")
 	}
 	f, err := os.Open(r.FormValue("FileName"))
 	if err != nil {
@@ -222,6 +217,6 @@ func (ctrl ItemOut) ImportItemOuts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err == nil {
-		fmt.Fprintln(w, importSuccess)
+		redirectWithAlert(w, r, itemOutHome, importSuccess)
 	}
 }

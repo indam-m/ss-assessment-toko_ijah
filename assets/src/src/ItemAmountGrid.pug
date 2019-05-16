@@ -10,9 +10,9 @@ table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
         | {{range $index, $itemAmount := .}}
         tr
             td \#{{$index}}
-            td {{$itemAmount.SKU}}
-            td {{$itemAmount.Name}}
-            td {{$itemAmount.Quantity}}
+            td(id="td-{{$index}}-id") {{$itemAmount.SKU}}
+            td(id="td-{{$index}}-name") {{$itemAmount.Name}}
+            td(id="td-{{$index}}-quantity") {{$itemAmount.Quantity}}
             td
                 include BaseAction.pug
         | {{end}}

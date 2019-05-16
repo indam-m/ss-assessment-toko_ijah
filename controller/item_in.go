@@ -2,8 +2,6 @@ package controller
 
 import (
 	"encoding/csv"
-	"encoding/json"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -15,6 +13,8 @@ import (
 
 // ItemIn is used as the controller struct
 type ItemIn struct{}
+
+var itemInHome = "/item-in"
 
 func getInitItemIn(r *http.Request) model.ItemIn {
 	var itemIn model.ItemIn
@@ -62,6 +62,8 @@ func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusBadRequest)
 	}
+	alertFromCookie(w, r)
+
 	itemIns := getItemInList(w, r)
 
 	t, err := template.New("item-in.html").Funcs(getTemplateFunc()).ParseFiles("assets/item-in.html")
@@ -73,7 +75,7 @@ func (ctrl ItemIn) GetItemIns(w http.ResponseWriter, r *http.Request) {
 // ExportItemIns exports list of item_ins
 func (ctrl ItemIn) ExportItemIns(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-in", 301)
+		redirectWithAlert(w, r, itemInHome, "")
 	}
 	itemIns := getItemInList(w, r)
 
@@ -101,14 +103,13 @@ func (ctrl ItemIn) ExportItemIns(w http.ResponseWriter, r *http.Request) {
 		checkInternalServerError(err, w)
 	}
 	// done creating csv file
-
-	fmt.Fprintln(w, exportSuccess)
+	redirectWithAlert(w, r, itemInHome, exportSuccess)
 }
 
 // CreateItemIn creates an item_in from request
 func (ctrl ItemIn) CreateItemIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-in", 301)
+		redirectWithAlert(w, r, itemInHome, "")
 	}
 	itemIn := getInitItemIn(r)
 
@@ -119,8 +120,7 @@ func (ctrl ItemIn) CreateItemIn(w http.ResponseWriter, r *http.Request) {
 		VALUES(?, ?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
-		fmt.Fprintln(w, "Prepare query error")
-		fmt.Fprintf(w, err.Error())
+		redirectWithAlert(w, r, itemAmountHome, "Prepare query error: "+err.Error())
 	}
 	_, err = stmt.Exec(
 		itemIn.SKU, itemIn.Time, itemIn.AmountOrders,
@@ -128,18 +128,15 @@ func (ctrl ItemIn) CreateItemIn(w http.ResponseWriter, r *http.Request) {
 		itemIn.ReceiptNumber, itemIn.Notes,
 	)
 	if err != nil {
-		fmt.Fprintln(w, "Execute query error")
-		fmt.Fprintf(w, err.Error())
+		redirectWithAlert(w, r, itemAmountHome, "Execute query error: "+err.Error())
 	}
-	txt, _ := json.Marshal(itemIn)
-	fmt.Fprintln(w, createSuccess)
-	fmt.Fprintf(w, string(txt))
+	redirectWithAlert(w, r, itemInHome, createSuccess)
 }
 
 // UpdateItemIn updates an item_in from request using item_in ID
 func (ctrl ItemIn) UpdateItemIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-in", 301)
+		redirectWithAlert(w, r, itemInHome, "")
 	}
 	itemIn := getInitItemIn(r)
 
@@ -160,15 +157,13 @@ func (ctrl ItemIn) UpdateItemIn(w http.ResponseWriter, r *http.Request) {
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	txt, _ := json.Marshal(itemIn)
-	fmt.Fprintln(w, updateSuccess)
-	fmt.Fprintf(w, string(txt))
+	redirectWithAlert(w, r, itemInHome, updateSuccess)
 }
 
 // DeleteItemIn deletes an item_in using requested ID
 func (ctrl ItemIn) DeleteItemIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-in", 301)
+		redirectWithAlert(w, r, itemInHome, "")
 	}
 	var itemID = r.FormValue("ID")
 	stmt, err := database.Prepare("DELETE FROM item_in WHERE id=?")
@@ -177,13 +172,13 @@ func (ctrl ItemIn) DeleteItemIn(w http.ResponseWriter, r *http.Request) {
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, deleteSuccess)
+	redirectWithAlert(w, r, itemInHome, deleteSuccess)
 }
 
 // ImportItemIns imports item_in list from csv file
 func (ctrl ItemIn) ImportItemIns(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-in", 301)
+		redirectWithAlert(w, r, itemInHome, "")
 	}
 	f, err := os.Open(r.FormValue("FileName"))
 	if err != nil {
@@ -218,6 +213,6 @@ func (ctrl ItemIn) ImportItemIns(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err == nil {
-		fmt.Fprintln(w, importSuccess)
+		redirectWithAlert(w, r, itemInHome, importSuccess)
 	}
 }

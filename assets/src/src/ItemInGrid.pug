@@ -17,16 +17,16 @@ table.w3-table.w3-centered.w3-border.w3-bordered.w3-hoverable
         | {{range $index, $itemIn := .}}
         tr
             td \#{{$index}}
-            td {{$itemIn.ID}}
-            td {{convertToUITime $itemIn.Time}}
-            td {{$itemIn.SKU}}
+            td(id="td-{{$index}}-id") {{$itemIn.ID}}
+            td(id="td-{{$index}}-time") {{convertToUITime $itemIn.Time}}
+            td(id="td-{{$index}}-sku") {{$itemIn.SKU}}
             td {{$itemIn.Name}}
-            td {{$itemIn.AmountOrders}}
-            td {{$itemIn.AmountReceived}}
-            td {{$itemIn.PurchasePrice}}
+            td(id="td-{{$index}}-amount-orders") {{$itemIn.AmountOrders}}
+            td(id="td-{{$index}}-amount-received") {{$itemIn.AmountReceived}}
+            td(id="td-{{$index}}-purchase-price") {{$itemIn.PurchasePrice}}
             td {{$itemIn.Total}}
-            td {{$itemIn.ReceiptNumber}}
-            td {{$itemIn.Notes}}
+            td(id="td-{{$index}}-receipt-number") {{$itemIn.ReceiptNumber}}
+            td(id="td-{{$index}}-notes") {{$itemIn.Notes}}
             td
                 include BaseAction.pug
         | {{end}}

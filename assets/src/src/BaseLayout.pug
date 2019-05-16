@@ -3,7 +3,6 @@ block head
         title= pageTitle
         link(href='/assets/css/ionicons/css/w3.css' rel='stylesheet')
         link(href='/assets/css/ionicons/css/ionicons.min.css' rel='stylesheet')
-        //- script(src="/assets/js/app.js")
 body
     .w3-row-padding
         .w3-card-2.w3-margin-top
@@ -40,8 +39,12 @@ body
             var editForm = document.getElementById('update-form');
             // display update form
             editForm.style.display = 'block';
-            var id = e.parentNode.parentNode.childNodes[1].innerText;
-            document.getElementById('id-to-update').value = id;
+            e.parentNode.parentNode.childNodes.forEach(function (node) {
+                if (node.id) {
+                    var name = node.id.replace(/td-\d-/g, "");
+                    document.getElementById('update-' + name).value = node.innerText;
+                }
+            })
         }
         function deleteItem(e) {
             var deleteForm = document.getElementById('delete-form');

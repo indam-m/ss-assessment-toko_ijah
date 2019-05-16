@@ -6,35 +6,35 @@
 include BaseModal.pug
     block form
         block inputs
-            input.w3-input#id-to-update(
+            input.w3-input#update-id(
                 name="ID"
                 type="hidden"
             )
             label.w3-label Waktu
-            input.w3-input(
+            input.w3-input#update-time(
                 name="Time"
                 placeholder="YYYY/MM/dd hh:mm:ss"
             )
             label.w3-label SKU
-            input.w3-input(
+            input.w3-input#update-sku(
                 name="SKU"
             )
             label.w3-label Jumlah Keluar
-            input.w3-input(
+            input.w3-input#update-amount-out(
                 name="AmountOut"
                 type="number"
             )
             label.w3-label Harga Jual
-            input.w3-input(
+            input.w3-input#update-selling-price(
                 name="SellingPrice"
                 type="number"
             )
             label.w3-label ID Pesanan
-            input.w3-input(
+            input.w3-input#update-order-id(
                 name="OrderID"
             )
             label.w3-label Catatan
-            input.w3-input(
+            input.w3-input#update-notes(
                 name="Notes"
             )
         button.w3-btn.w3-teal.w3-margin-top.w3-margin-bottom.w3-right(type="submit")= buttonName

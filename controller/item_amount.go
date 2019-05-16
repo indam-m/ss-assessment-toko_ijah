@@ -16,6 +16,8 @@ import (
 // ItemAmount is used as the controller struct
 type ItemAmount struct{}
 
+const itemAmountHome = "/item-amount"
+
 func getInitItemAmount(r *http.Request) model.ItemAmount {
 	var itemAmount model.ItemAmount
 	itemAmount.SKU = r.FormValue("SKU")
@@ -43,6 +45,8 @@ func (ctrl ItemAmount) GetItemAmounts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusBadRequest)
 	}
+	alertFromCookie(w, r)
+
 	itemAmounts := getItemAmountList(w, r)
 	t, err := template.New("item-amount.html").ParseFiles("assets/item-amount.html")
 	checkInternalServerError(err, w)
@@ -53,7 +57,7 @@ func (ctrl ItemAmount) GetItemAmounts(w http.ResponseWriter, r *http.Request) {
 // ExportItemAmounts exports list of item_amounts
 func (ctrl ItemAmount) ExportItemAmounts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-amount", 301)
+		redirectWithAlert(w, r, itemAmountHome, "")
 	}
 	itemAmounts := getItemAmountList(w, r)
 
@@ -75,8 +79,7 @@ func (ctrl ItemAmount) ExportItemAmounts(w http.ResponseWriter, r *http.Request)
 	}
 	// done creating csv file
 
-	fmt.Fprintln(w, exportSuccess)
-	http.Redirect(w, r, "/item-amount", 301)
+	redirectWithAlert(w, r, itemAmountHome, exportSuccess)
 }
 
 // GetItemAmount returns an item_amounts based on SKU
@@ -100,7 +103,7 @@ func (ctrl ItemAmount) GetItemAmount(w http.ResponseWriter, r *http.Request, ite
 // CreateItemAmount creates an item_amount from request
 func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-amount", 301)
+		redirectWithAlert(w, r, itemAmountHome, "")
 	}
 	itemAmount := getInitItemAmount(r)
 
@@ -110,26 +113,21 @@ func (ctrl ItemAmount) CreateItemAmount(w http.ResponseWriter, r *http.Request) 
 		VALUES(?, ?, ?)
 	`)
 	if err != nil {
-		fmt.Fprintln(w, "Prepare query error")
-		fmt.Fprintf(w, err.Error())
+		redirectWithAlert(w, r, itemAmountHome, "Prepare query error: "+err.Error())
 		return
 	}
 	_, err = stmt.Exec(itemAmount.SKU, itemAmount.Name, itemAmount.Quantity)
 	if err != nil {
-		fmt.Fprintln(w, "Execute query error")
-		fmt.Fprintf(w, err.Error())
+		redirectWithAlert(w, r, itemAmountHome, "Execute query error: "+err.Error())
 		return
 	}
-	txt, _ := json.Marshal(itemAmount)
-	fmt.Fprintln(w, createSuccess)
-	fmt.Fprintf(w, string(txt))
-	http.Redirect(w, r, "/item-amount", 301)
+	redirectWithAlert(w, r, itemAmountHome, createSuccess)
 }
 
 // UpdateItemAmount updates an item_amount from request
 func (ctrl ItemAmount) UpdateItemAmount(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-amount", 301)
+		redirectWithAlert(w, r, itemAmountHome, "")
 	}
 	itemAmount := getInitItemAmount(r)
 
@@ -142,16 +140,13 @@ func (ctrl ItemAmount) UpdateItemAmount(w http.ResponseWriter, r *http.Request) 
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	txt, _ := json.Marshal(itemAmount)
-	fmt.Fprintln(w, updateSuccess)
-	fmt.Fprintf(w, string(txt))
-	http.Redirect(w, r, "/item-amount", 301)
+	redirectWithAlert(w, r, itemAmountHome, updateSuccess)
 }
 
 // DeleteItemAmount deletes an item_amount using requested SKU
 func (ctrl ItemAmount) DeleteItemAmount(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-amount", 301)
+		redirectWithAlert(w, r, itemAmountHome, "")
 	}
 	var itemSKU = r.FormValue("SKU")
 	stmt, err := database.Prepare("DELETE FROM item_amount WHERE sku=?")
@@ -160,14 +155,13 @@ func (ctrl ItemAmount) DeleteItemAmount(w http.ResponseWriter, r *http.Request) 
 	checkInternalServerError(err, w)
 	_, err = res.RowsAffected()
 	checkInternalServerError(err, w)
-	fmt.Fprintf(w, deleteSuccess)
-	http.Redirect(w, r, "/item-amount", 301)
+	redirectWithAlert(w, r, itemAmountHome, deleteSuccess)
 }
 
 // ImportItemAmounts imports item_amount list from csv file
 func (ctrl ItemAmount) ImportItemAmounts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Redirect(w, r, "/item-amount", 301)
+		redirectWithAlert(w, r, itemAmountHome, "")
 	}
 	f, err := os.Open(r.FormValue("FileName"))
 	if err != nil {
@@ -198,6 +192,6 @@ func (ctrl ItemAmount) ImportItemAmounts(w http.ResponseWriter, r *http.Request)
 		}
 	}
 	if err == nil {
-		fmt.Fprintln(w, importSuccess)
+		redirectWithAlert(w, r, itemAmountHome, importSuccess)
 	}
 }

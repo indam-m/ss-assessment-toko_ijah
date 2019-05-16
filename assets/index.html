@@ -1,9 +1,13 @@
-<head><title>Home</title><link href="/assets/css/ionicons/css/w3.css" rel="stylesheet"/><link href="/assets/css/ionicons/css/ionicons.min.css" rel="stylesheet"/></head><body><div class="w3-row-padding"><div class="w3-card-2 w3-margin-top"><div class="w3-container w3-center"><div class="w3-row w3-padding-16"><h1>Selamat Datang Di Toko Ijah</h1></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-amount">Catatan Jumlah </a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-in">Catatan Barang Masuk</a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-out">Catatan Barang Keluar</a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-value-report">Laporan Nilai Barang</a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/selling-report">Laporan Penjualan</a></div></div></div></div><script>function updateItem(e) {
+<head><title>Home</title><link href="/assets/css/ionicons/css/w3.css" rel="stylesheet"/><link href="/assets/css/ionicons/css/ionicons.min.css" rel="stylesheet"/></head><body><div class="w3-row-padding"><div class="w3-card-2 w3-margin-top"><div class="w3-container w3-center"><div class="w3-row w3-padding-16"><h1>Selamat Datang Di Toko Ijah</h1></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-amount">Catatan Jumlah Barang</a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-in">Catatan Barang Masuk</a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-out">Catatan Barang Keluar</a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/item-value-report">Laporan Nilai Barang</a></div><div class="w3-row w3-padding-16"><a class="w3-btn-block w3-teal" href="/selling-report">Laporan Penjualan</a></div></div></div></div><script>function updateItem(e) {
     var editForm = document.getElementById('update-form');
     // display update form
     editForm.style.display = 'block';
-    var id = e.parentNode.parentNode.childNodes[1].innerText;
-    document.getElementById('id-to-update').value = id;
+    e.parentNode.parentNode.childNodes.forEach(function (node) {
+        if (node.id) {
+            var name = node.id.replace(/td-\d-/g, "");
+            document.getElementById('update-' + name).value = node.innerText;
+        }
+    })
 }
 function deleteItem(e) {
     var deleteForm = document.getElementById('delete-form');
