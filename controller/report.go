@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"html/template"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/indam-m/ss-assessment-toko_ijah/model"
@@ -68,10 +67,9 @@ func (ctrl Report) ExportItemValueReport(w http.ResponseWriter, r *http.Request)
 	report := getItemValueReport(w)
 
 	// creating csv file
-	f, err := os.Create("laporan_nilai_barang.csv")
-	checkInternalServerError(err, w)
-	defer f.Close()
-	csvw := csv.NewWriter(f)
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=laporan_nilai_barang.csv")
+	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
 	csvw.Write([]string{"LAPORAN NILAI BARANG"})
@@ -94,8 +92,6 @@ func (ctrl Report) ExportItemValueReport(w http.ResponseWriter, r *http.Request)
 		checkInternalServerError(err, w)
 	}
 	// done creating csv file
-
-	redirectWithAlert(w, r, itemValueReportHome, exportSuccess)
 }
 
 func getFilteringDate(str string, isFrom bool) string {
@@ -179,10 +175,9 @@ func (ctrl Report) ExportSellingReport(w http.ResponseWriter, r *http.Request) {
 	report := getSellingReport(w, r)
 
 	// creating csv file
-	f, err := os.Create("laporan_penjualan.csv")
-	checkInternalServerError(err, w)
-	defer f.Close()
-	csvw := csv.NewWriter(f)
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=laporan_penjualan.csv")
+	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
 	csvw.Write([]string{"LAPORAN PENJUALAN"})
@@ -211,6 +206,4 @@ func (ctrl Report) ExportSellingReport(w http.ResponseWriter, r *http.Request) {
 		checkInternalServerError(err, w)
 	}
 	// done creating csv file
-
-	redirectWithAlert(w, r, sellingReportHome, exportSuccess)
 }

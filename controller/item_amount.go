@@ -62,10 +62,9 @@ func (ctrl ItemAmount) ExportItemAmounts(w http.ResponseWriter, r *http.Request)
 	itemAmounts := getItemAmountList(w, r)
 
 	// creating csv file
-	f, err := os.Create("catatan_jumlah_barang.csv")
-	checkInternalServerError(err, w)
-	defer f.Close()
-	csvw := csv.NewWriter(f)
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=catatan_jumlah_barang.csv")
+	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
 	csvw.Write([]string{"SKU", "Nama Item", "Jumlah Sekarang"})
@@ -78,8 +77,6 @@ func (ctrl ItemAmount) ExportItemAmounts(w http.ResponseWriter, r *http.Request)
 		checkInternalServerError(err, w)
 	}
 	// done creating csv file
-
-	redirectWithAlert(w, r, itemAmountHome, exportSuccess)
 }
 
 // GetItemAmount returns an item_amounts based on SKU

@@ -80,10 +80,9 @@ func (ctrl ItemIn) ExportItemIns(w http.ResponseWriter, r *http.Request) {
 	itemIns := getItemInList(w, r)
 
 	// creating csv file
-	f, err := os.Create("catatan_barang_masuk.csv")
-	checkInternalServerError(err, w)
-	defer f.Close()
-	csvw := csv.NewWriter(f)
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=catatan_barang_masuk.csv")
+	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
 	csvw.Write([]string{"ID", "Waktu", "SKU", "Nama Barang", "Jumlah Pemesanan", "Jumlah Diterima", "Harga Beli", "Total", "Nomer Kwitansi", "Catatan"})
@@ -103,7 +102,6 @@ func (ctrl ItemIn) ExportItemIns(w http.ResponseWriter, r *http.Request) {
 		checkInternalServerError(err, w)
 	}
 	// done creating csv file
-	redirectWithAlert(w, r, itemInHome, exportSuccess)
 }
 
 // CreateItemIn creates an item_in from request
